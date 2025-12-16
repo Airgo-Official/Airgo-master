@@ -1,0 +1,57 @@
+<resources>
+    <string name="drawer_slogan">AirGo Master</string>
+    <string name="copyright" translatable="false">Copyright © %1$d - %2$d Airgo. All Rights Reserved.</string>
+    <string name="home">Home</string>
+    <string name="me">Me</string>
+
+
+
+    <string name="status">Status</string>
+    <string name="all">All</string>
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+
+    <string name="time_range">Time Range</string>
+    <string name="confirm">Confirm</string>
+
+    <string name="search_history">Search History</string>
+    <string name="search_key">Search key</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+
+
+    <string name="node">Node</string>
+    <string name="edit_node">Edit Node</string>
+    <string name="node_details">Node Details</string>
+
+    <string name="protocol_list">Protocol List</string>
+    <string name="unknown_protocol">Unknown Protocol</string>
+    <string name="create_protocol">Create Protocol</string>
+    <string name="protocol_name">Name</string>
+    <string name="protocol_address">Address</string>
+    <string name="protocol_port">Port</string>
+    <string name="protocol_bind_template">Bind Template</string>
+    <string name="protocol_inbounds">Inbounds</string>
+    <string name="protocol_no_template">No Template</string>
+
+
+    <string name="log_title">Log</string>
+    <string name="log_clear">Clear</string>
+    <string name="log_status_stopped">Stopped</string>
+    <string name="log_status_recording">Recording</string>
+
+    <string name="warning">Warning!</string>
+    <string name="delete_confirmation">Data cannot be recovered after deletion. Confirm deletion?</string>
+    <string name="data_empty">Data is empty</string>
+    <string name="email_format_tip">Email format: 123@qq.com, 6-40 characters</string>
+    <string name="password_format_tip">Password format: 123!@%_abc, 6-40 characters</string>
+    <string name="number_with_two_decimals_tip">Please enter a number (with two decimal places)</string>
+    <string name="number_tip">Please enter a number</string>
+
+    <string name="product_category_subscribe">Subscribe product</string>
+    <string name="product_category_normal">Normal product</string>
+
+
+</resources>
