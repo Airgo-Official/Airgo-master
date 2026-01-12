@@ -2,14 +2,13 @@ package io.github.ppoonk.airgo_master.ui.store.product.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -18,14 +17,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,8 +42,8 @@ import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.ac.ui.component.ACLabelPrimary
 import io.github.ppoonk.ac.ui.component.ACModalBottomSheet
 import io.github.ppoonk.ac.ui.component.ACRichTextEditorDrawer
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
+import io.github.ppoonk.ac.ui.component.AutoSizeFade
 import io.github.ppoonk.ac.utils.diffObject
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
@@ -53,7 +53,24 @@ import io.github.ppoonk.airgo_master.component.EditType
 import io.github.ppoonk.airgo_master.repository.Repository
 import io.github.ppoonk.airgo_master.repository.remote.model.ProductCategory
 import io.github.ppoonk.airgo_master.repository.remote.model.Status
+import io.github.ppoonk.airgo_master.sharedViewModel.SharedVM
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.node
+import io.github.ppoonk.airgo_master.product_annual_price
+import io.github.ppoonk.airgo_master.product_associated_protocol
+import io.github.ppoonk.airgo_master.product_category
+import io.github.ppoonk.airgo_master.product_create
+import io.github.ppoonk.airgo_master.product_detail
+import io.github.ppoonk.airgo_master.product_main_image
+import io.github.ppoonk.airgo_master.product_monthly_price
+import io.github.ppoonk.airgo_master.product_name
+import io.github.ppoonk.airgo_master.product_quarterly_price
+import io.github.ppoonk.airgo_master.product_semi_annual_price
+import io.github.ppoonk.airgo_master.product_status
+import io.github.ppoonk.airgo_master.product_update
+import io.github.ppoonk.airgo_master.reset
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,21 +79,21 @@ fun EditProductScreen() {
     val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
     val sharedVM = LocalSharedVM.current
-    val widget by sharedVM.storeVM.productWidget.collectAsState()
+    val widget by sharedVM.storeVM.editProductWidget.collectAsState()
     val nodeList = sharedVM.nodeVM.protocolList.collectAsLazyPagingItems()
     val protocolList = sharedVM.nodeVM.protocolList.collectAsLazyPagingItems()
-    val vm = sharedVM.storeVM
-
 
     Scaffold(
         topBar = {
             ACTopAppBar(
                 title = {
                     Text(
-                        when (widget.editType) {
-                            EditType.CREATE -> "创建商品"
-                            EditType.UPDATE -> "编辑商品"
-                        }
+                        stringResource(
+                            when (widget.editType) {
+                                EditType.CREATE -> Res.string.product_create
+                                EditType.UPDATE -> Res.string.product_update
+                            }
+                        )
                     )
                 },
                 navigationIcon = {
@@ -110,12 +127,12 @@ fun EditProductScreen() {
                                         diffObject(
                                             widget.oldUpdateProductReq,
                                             widget.toUpdateProductReq()
-                                        )?.let {
-                                            Repository.remote.updateProduct(it.copy(id = widget.oldUpdateProductReq.id))
-                                                .onFailure {
+                                        )?.let { req ->
+                                            Repository.remote.updateProduct(req.copy(id = widget.oldUpdateProductReq.id))
+                                                .onFailure { r ->
                                                     sharedVM.dialogVM.openDialog(
-                                                        title = { Text(it.code.toString()) },
-                                                        text = { Text(it.message) }
+                                                        title = { Text(r.code.toString()) },
+                                                        text = { Text(r.message) }
                                                     )
                                                 }
                                                 .onSuccess {
@@ -134,178 +151,54 @@ fun EditProductScreen() {
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(paddingValues).imePadding()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 16.dp),
-        ) {
-            item {
-                Text("商品类别")
-                ExposedDropdownMenuBox(
-                    expanded = widget.expandProductCategory,
-                    onExpandedChange = { vm.expandProductCategory(it) },
-                ) {
-                    ACTextField(
-                        modifier = Modifier.fillParentMaxWidth()
-                            .padding(top = 8.dp, bottom = 16.dp)
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        value = widget.category.i18n(),
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) }
-                    )
-                    ExposedDropdownMenu(
-                        expanded = widget.expandProductCategory,
-                        onDismissRequest = { vm.expandProductCategory(false) },
-                    ) {
-                        ProductCategory.entries.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category.i18n()) },
-                                onClick = { vm.productCategory(category) }
-                            )
-                        }
-                    }
-                }
-            }
-            item {
-                Text("商品名称")
-                ACTextField(
-                    value = widget.name,
-                    onValueChange = { vm.productName(it) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
+        AutoSizeFade(
+            compact = {
+                compact(
+                    modifier = Modifier.padding(paddingValues).padding(horizontal = 16.dp),
+                    sharedVM
                 )
-            }
-            item {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
-                ) {
-                    Text("商品状态")
-                    Switch(
-                        checked = widget.status == Status.ENABLE,
-                        onCheckedChange = { vm.productStatus(it) },
-                        modifier = Modifier.fillMaxHeight()
-                    )
-                }
-            }
-            if (widget.category == ProductCategory.PRODUCT_CATEGORY_SUBSCRIBE) {
-                item {
-                    Text("绑定协议数量")
-                    ACTextField(
-                        value = "绑定协议数量：${widget.protocolIdList.size}",
-                        onValueChange = {},
-                        enabled = false,// 设置为 false 时 clickable 点击才有效
-                        trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
-                            .clickable {
-                                vm.expandSelectNode(v = true)
-                            }
-                    )
-                }
-            }
-
-            item {
-                Text("主图")
-                ACTextField(
-                    value = widget.mainImage,
-                    onValueChange = { vm.productMainImage(it) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
+            },
+            medium = {
+                compact(
+                    modifier = Modifier.padding(paddingValues).padding(horizontal = 16.dp),
+                    sharedVM = sharedVM,
                 )
-            }
-            item {
-                Text("基础价格")
-                ACTextField(
-                    value = widget.monthlyPrice,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    onValueChange = { vm.productBasePrice(it) },
-                    isError = widget.monthlyPriceError.isNotEmpty(),
-                    supportingText = { Text(widget.monthlyPriceError) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
+            },
+            expanded = {
+                expanded(
+                    modifier = Modifier.padding(paddingValues).padding(horizontal = 16.dp),
+                    sharedVM
                 )
-            }
-            item {
-                Text("季度价格")
-                ACTextField(
-                    value = widget.quarterlyPrice,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    onValueChange = { vm.productQuarterlyPrice(it) },
-                    isError = widget.quarterlyPriceError.isNotEmpty(),
-                    supportingText = { Text(widget.quarterlyPriceError) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
-                )
-            }
-            item {
-                Text("半年价格")
-                ACTextField(
-                    value = widget.semiAnnualPrice,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    onValueChange = { vm.productSemiAnnualPrice(it) },
-                    isError = widget.semiAnnualPriceError.isNotEmpty(),
-                    supportingText = { Text(widget.semiAnnualPriceError) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
-                )
-            }
-            item {
-                Text("年价格")
-                ACTextField(
-                    value = widget.annualPrice,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    onValueChange = { vm.productAnnualPrice(it) },
-                    isError = widget.annualPriceError.isNotEmpty(),
-                    supportingText = { Text(widget.annualPriceError) },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp)
-                )
-            }
-            item {
-                Text("商品详情")
-                ACDisplayRichText(
-                    text = widget.detail,
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
-                        .clickable { vm.productRichTextEditor(true) }
-                )
-            }
-        }
+            },
+        )
 
         // 富文本编辑
         ACRichTextEditorDrawer(
             modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
             text = widget.detail,
             expanded = widget.expandRichTextEditorDrawer,
-            onDismissRequest = { vm.productRichTextEditor(false) },
-            onSaved = { vm.productDetail(it) }
+            onDismissRequest = { sharedVM.storeVM.editProductWidgetExpandRichTextEditor(false) },
+            onSaved = { sharedVM.storeVM.editProductWidgetDetail(it) },
         )
 
         // 关联协议
         ACModalBottomSheet(
-            expanded = widget.expandSelectNode,
-            onDismissRequest = { vm.expandSelectNode(false) },
+            expanded = widget.expandSelectProtocol,
+            onDismissRequest = { sharedVM.storeVM.editProductWidgetExpandSelectNode(false) },
             dragHandle = {
                 ACDragHandle(
                     start = {
-                        IconButton(onClick = { vm.expandSelectNode(false) }) {
+                        IconButton(onClick = {
+                            sharedVM.storeVM.editProductWidgetExpandSelectNode(
+                                false
+                            )
+                        }) {
                             ACIconSmall(ACIconDefault.AngleLeft, null)
                         }
                     },
                     end = {
-                        TextButton(onClick = { vm.productClearCheckedProtocolId() }) {
-                            Text("重置")
+                        TextButton(onClick = { sharedVM.storeVM.editProductWidgetClearCheckedProtocol() }) {
+                            Text(stringResource(Res.string.reset))
                         }
                     },
                 )
@@ -323,7 +216,7 @@ fun EditProductScreen() {
                             modifier = Modifier.fillMaxWidth().padding(start = 16.dp)
                         ) {
                             ACLabelPrimary(
-                                "节点",
+                                stringResource(Res.string.node),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
@@ -342,7 +235,12 @@ fun EditProductScreen() {
 
                                     Checkbox(
                                         checked = widget.protocolIdList.contains(p.id),
-                                        onCheckedChange = { vm.productCheckedProtocolId(p.id, it) }
+                                        onCheckedChange = {
+                                            sharedVM.storeVM.editProductWidgetCheckedProtocol(
+                                                p.id,
+                                                it
+                                            )
+                                        }
                                     )
                                     Text(p.name)
                                 }
@@ -351,6 +249,344 @@ fun EditProductScreen() {
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun compact(modifier: Modifier, sharedVM: SharedVM): Unit {
+    val widget by sharedVM.storeVM.editProductWidget.collectAsState()
+
+    LazyColumn(
+        modifier = modifier,
+    ) {
+        item {
+            Text(stringResource(Res.string.product_name))
+            TextField(
+                value = widget.name,
+                onValueChange = { sharedVM.storeVM.editProductWidgetName(it) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            ) {
+                Text(stringResource(Res.string.product_status))
+                Switch(
+                    checked = widget.status == Status.ENABLE,
+                    onCheckedChange = { sharedVM.storeVM.editProductWidgetStatus(it) },
+                    modifier = Modifier.fillMaxHeight()
+                )
+            }
+        }
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+            ) {
+                Text(stringResource(Res.string.product_category))
+                ExposedDropdownMenuBox(
+                    expanded = widget.expandProductCategory,
+                    onExpandedChange = {
+                        sharedVM.storeVM.editProductWidgetExpandProductCategory(
+                            it
+                        )
+                    },
+                ) {
+                    TextField(
+                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                        value = widget.category.i18n(),
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) }
+                    )
+                    ExposedDropdownMenu(
+                        expanded = widget.expandProductCategory,
+                        onDismissRequest = {
+                            sharedVM.storeVM.editProductWidgetExpandProductCategory(
+                                false
+                            )
+                        },
+                    ) {
+                        ProductCategory.entries.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.i18n()) },
+                                onClick = { sharedVM.storeVM.editProductWidgetCategory(category) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        if (widget.category == ProductCategory.PRODUCT_CATEGORY_SUBSCRIBE) {
+            item {
+                Text(stringResource(Res.string.product_associated_protocol))
+                TextField(
+                    value = "${stringResource(Res.string.product_associated_protocol)}: ${widget.protocolIdList.size}",
+                    onValueChange = {},
+                    enabled = false,// 设置为 false 时 clickable 点击才有效
+                    trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+                        .clickable {
+                            sharedVM.storeVM.editProductWidgetExpandSelectNode(v = true)
+                        }
+                )
+            }
+        }
+
+        item {
+            Text(stringResource(Res.string.product_main_image))
+            TextField(
+                value = widget.mainImage,
+                onValueChange = { sharedVM.storeVM.editProductWidgetMainImage(it) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Text(stringResource(Res.string.product_monthly_price))
+            TextField(
+                value = widget.monthlyPrice,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                onValueChange = { sharedVM.storeVM.editProductWidgetMonthlyPrice(it) },
+                isError = widget.monthlyPriceError.isNotEmpty(),
+                supportingText = { Text(widget.monthlyPriceError) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Text(stringResource(Res.string.product_quarterly_price))
+            TextField(
+                value = widget.quarterlyPrice,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                onValueChange = { sharedVM.storeVM.editProductWidgetQuarterlyPrice(it) },
+                isError = widget.quarterlyPriceError.isNotEmpty(),
+                supportingText = { Text(widget.quarterlyPriceError) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Text(stringResource(Res.string.product_semi_annual_price))
+            TextField(
+                value = widget.semiAnnualPrice,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                onValueChange = { sharedVM.storeVM.editProductWidgetSemiAnnualPrice(it) },
+                isError = widget.semiAnnualPriceError.isNotEmpty(),
+                supportingText = { Text(widget.semiAnnualPriceError) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Text(stringResource(Res.string.product_annual_price))
+            TextField(
+                value = widget.annualPrice,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                onValueChange = { sharedVM.storeVM.editProductWidgetAnnualPrice(it) },
+                isError = widget.annualPriceError.isNotEmpty(),
+                supportingText = { Text(widget.annualPriceError) },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
+        }
+        item {
+            Text(stringResource(Res.string.product_detail))
+            ACDisplayRichText(
+                text = widget.detail,
+                enabled = false,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+                    .clickable {
+                        sharedVM.storeVM.editProductWidgetExpandRichTextEditor(true)
+                    }
+            )
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun expanded(modifier: Modifier, sharedVM: SharedVM): Unit {
+    val widget by sharedVM.storeVM.editProductWidget.collectAsState()
+
+    Row(modifier = modifier) {
+        LazyColumn(
+            modifier = Modifier.padding(end = 8.dp).weight(1f),
+        ) {
+            item {
+                Text(stringResource(Res.string.product_name))
+                TextField(
+                    value = widget.name,
+                    onValueChange = { sharedVM.storeVM.editProductWidgetName(it) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                ) {
+                    Text(stringResource(Res.string.product_status))
+                    Switch(
+                        checked = widget.status == Status.ENABLE,
+                        onCheckedChange = { sharedVM.storeVM.editProductWidgetStatus(it) },
+                        modifier = Modifier.fillMaxHeight()
+                    )
+                }
+            }
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+                ) {
+                    Text(stringResource(Res.string.product_category))
+                    ExposedDropdownMenuBox(
+                        expanded = widget.expandProductCategory,
+                        onExpandedChange = {
+                            sharedVM.storeVM.editProductWidgetExpandProductCategory(
+                                it
+                            )
+                        },
+                    ) {
+                        TextField(
+                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            value = widget.category.i18n(),
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = widget.expandProductCategory,
+                            onDismissRequest = {
+                                sharedVM.storeVM.editProductWidgetExpandProductCategory(
+                                    false
+                                )
+                            },
+                        ) {
+                            ProductCategory.entries.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category.i18n()) },
+                                    onClick = { sharedVM.storeVM.editProductWidgetCategory(category) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            if (widget.category == ProductCategory.PRODUCT_CATEGORY_SUBSCRIBE) {
+                item {
+                    Text(stringResource(Res.string.product_associated_protocol))
+                    TextField(
+                        value = "${stringResource(Res.string.product_associated_protocol)}: ${widget.protocolIdList.size}",
+                        onValueChange = {},
+                        enabled = false,// 设置为 false 时 clickable 点击才有效
+                        trailingIcon = { ACIconSmall(ACIconDefault.Sort, null) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+                            .clickable {
+                                sharedVM.storeVM.editProductWidgetExpandSelectNode(v = true)
+                            }
+                    )
+                }
+            }
+
+            item {
+                Text(stringResource(Res.string.product_main_image))
+                TextField(
+                    value = widget.mainImage,
+                    onValueChange = { sharedVM.storeVM.editProductWidgetMainImage(it) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+            item {
+                Text(stringResource(Res.string.product_monthly_price))
+                TextField(
+                    value = widget.monthlyPrice,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = { sharedVM.storeVM.editProductWidgetMonthlyPrice(it) },
+                    isError = widget.monthlyPriceError.isNotEmpty(),
+                    supportingText = { Text(widget.monthlyPriceError) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+            item {
+                Text(stringResource(Res.string.product_quarterly_price))
+                TextField(
+                    value = widget.quarterlyPrice,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = { sharedVM.storeVM.editProductWidgetQuarterlyPrice(it) },
+                    isError = widget.quarterlyPriceError.isNotEmpty(),
+                    supportingText = { Text(widget.quarterlyPriceError) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+            item {
+                Text(stringResource(Res.string.product_semi_annual_price))
+                TextField(
+                    value = widget.semiAnnualPrice,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = { sharedVM.storeVM.editProductWidgetSemiAnnualPrice(it) },
+                    isError = widget.semiAnnualPriceError.isNotEmpty(),
+                    supportingText = { Text(widget.semiAnnualPriceError) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+            item {
+                Text(stringResource(Res.string.product_annual_price))
+                TextField(
+                    value = widget.annualPrice,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = { sharedVM.storeVM.editProductWidgetAnnualPrice(it) },
+                    isError = widget.annualPriceError.isNotEmpty(),
+                    supportingText = { Text(widget.annualPriceError) },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 16.dp)
+                )
+            }
+        }
+        Column(
+            modifier = Modifier.padding(start = 8.dp).weight(2f), // TODO 其他也修改padding
+        ) {
+            Text(stringResource(Res.string.product_detail))
+            ACDisplayRichText(
+                text = widget.detail,
+                enabled = false,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
+                    .clickable { sharedVM.storeVM.editProductWidgetExpandRichTextEditor(true) }
+            )
+
         }
     }
 }

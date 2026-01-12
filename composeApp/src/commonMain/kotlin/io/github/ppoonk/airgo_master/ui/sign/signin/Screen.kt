@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,18 +34,21 @@ import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.ac.ui.component.ACPasswordVisibilityToggle
 import io.github.ppoonk.ac.ui.component.ACTextError
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
 import io.github.ppoonk.airgo_master.LocalNavController
 import io.github.ppoonk.airgo_master.LocalSharedVM
 import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.configuration_api_base_url
+import io.github.ppoonk.airgo_master.configuration_api_base_url_placeholder
+import io.github.ppoonk.airgo_master.configuration_backend_admin_path
+import io.github.ppoonk.airgo_master.configuration_backend_admin_path_placeholder
 import io.github.ppoonk.airgo_master.email
 import io.github.ppoonk.airgo_master.logo
+import io.github.ppoonk.airgo_master.more
 import io.github.ppoonk.airgo_master.navigation.Routes
 import io.github.ppoonk.airgo_master.navigation.toMain
 import io.github.ppoonk.airgo_master.password
-import io.github.ppoonk.airgo_master.repository.Repository
 import io.github.ppoonk.airgo_master.sign_in
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -56,8 +60,7 @@ fun SignInScreen() {
     val navController = LocalNavController.current
     val sharedVM = LocalSharedVM.current
     val signInWidget by sharedVM.userVM.signInWidget.collectAsState()
-    val securityWidget by sharedVM.configurationVM.securityWidget.collectAsState()
-
+    val securityWidget by sharedVM.configurationVM.editSecurityWidget.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -68,7 +71,7 @@ fun SignInScreen() {
                 .widthIn(max = 600.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
-                .imePadding(), // 避免软键盘遮挡
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -83,7 +86,7 @@ fun SignInScreen() {
             )
 
             // 邮箱输入框
-            ACTextField(
+            OutlinedTextField(
                 value = signInWidget.email,
                 label = { Text(stringResource(Res.string.email)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -93,7 +96,7 @@ fun SignInScreen() {
                 supportingText = { ACTextError(signInWidget.emailError) },
             )
             // 密码输入框
-            ACTextField(
+            OutlinedTextField(
                 value = signInWidget.password,
                 label = { Text(stringResource(Res.string.password)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
@@ -114,7 +117,7 @@ fun SignInScreen() {
                     sharedVM.userVM.signInShowMore()
                 },
             ) {
-                Text("更多")
+                Text(stringResource(Res.string.more))
                 ACIcon(
                     if (signInWidget.showMore) ACIconDefault.AngleUp else ACIconDefault.AngleDown,
                     null
@@ -127,17 +130,19 @@ fun SignInScreen() {
                     verticalArrangement = Arrangement.Center
                 ) {
                     // api 地址
-                    ACTextField(
+                    OutlinedTextField(
                         value = securityWidget.localApiUrl,
-                        label = { Text("API 地址") },
+                        label = { Text(stringResource(Res.string.configuration_api_base_url)) },
+                        placeholder = { Text(stringResource(Res.string.configuration_api_base_url_placeholder)) },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                         onValueChange = { sharedVM.configurationVM.localApiUrl(it) },
                         leadingIcon = { ACIconSmall(ACIconDefault.Server, null) },
                     )
                     // 管理员安全路径
-                    ACTextField(
+                    OutlinedTextField(
                         value = securityWidget.localAdminPath,
-                        label = { Text("管理员安全路径") },
+                        label = { Text(stringResource(Res.string.configuration_backend_admin_path)) },
+                        placeholder = { Text(stringResource(Res.string.configuration_backend_admin_path_placeholder)) },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                         onValueChange = { sharedVM.configurationVM.localAdminPath(it) },
                         leadingIcon = { ACIconSmall(ACIconDefault.Shield, null) },

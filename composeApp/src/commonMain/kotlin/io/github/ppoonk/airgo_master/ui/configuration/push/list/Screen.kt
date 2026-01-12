@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.ppoonk.ac.ui.component.ACCard
 import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.airgo_master.LocalNavController
@@ -37,9 +37,8 @@ fun EmailScreen() {
         sharedVM.configurationVM.getPushList()
     }
 
-
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).imePadding(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         item {
             Row(
@@ -60,7 +59,7 @@ fun EmailScreen() {
             Text("Email")
             Spacer(Modifier.height(8.dp))
             pushList.filter { it.pushType == PushType.EMAIL.name }.forEach { p ->
-                ACCard {
+                Card {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -69,8 +68,8 @@ fun EmailScreen() {
                         Text(p.name)
                         Text(p.pushType)
                     }
-
                 }
+                Spacer(Modifier.height(8.dp))
             }
             Spacer(Modifier.height(16.dp))
         }
@@ -78,7 +77,7 @@ fun EmailScreen() {
             Text("Telegram bot")
             Spacer(Modifier.height(8.dp))
             pushList.filter { it.pushType == PushType.TG_BOT.name }.forEach { p ->
-                ACCard {
+                Card {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,

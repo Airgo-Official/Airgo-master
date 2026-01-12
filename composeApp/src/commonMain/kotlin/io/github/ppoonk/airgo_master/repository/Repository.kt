@@ -11,6 +11,19 @@ object Repository {
     val local = LocalData
     val remote = ApiService
 
+
+    /**
+     * 创建一个新的分页数据源
+     *
+     * @param defaultPageSize 默认每页数据大小，默认值为20
+     * @param fetchData 获取数据的函数，接收一个Pair<Int, Int>参数，返回Pair<List<T>, Int>
+     *                  - 参数Pair<Int, Int>中:
+     *                    - 第一个Int: page - 请求的页码
+     *                    - 第二个Int: pageSize - 每页的数据条数
+     *                  - 返回值Pair<List<T>, Int>中:
+     *                    - List<T>: 当前页的数据列表
+     *                    - Int: 总数据条数
+     */
     fun <T : Any> newPagingSource(
         defaultPageSize: Int = 20,
         fetchData: suspend (Pair<Int, Int>) -> Pair<List<T>, Int>

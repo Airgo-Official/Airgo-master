@@ -1,17 +1,35 @@
 package io.github.ppoonk.airgo_master.repository.remote.model
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.operate
+import io.github.ppoonk.airgo_master.product_annual_price
+import io.github.ppoonk.airgo_master.product_category
 import io.github.ppoonk.airgo_master.product_category_normal
 import io.github.ppoonk.airgo_master.product_category_subscribe
-import kotlinx.datetime.Instant
+import io.github.ppoonk.airgo_master.product_created_at
+import io.github.ppoonk.airgo_master.product_detail
+import io.github.ppoonk.airgo_master.product_id
+import io.github.ppoonk.airgo_master.product_main_image
+import io.github.ppoonk.airgo_master.product_monthly_price
+import io.github.ppoonk.airgo_master.product_name
+import io.github.ppoonk.airgo_master.product_quarterly_price
+import io.github.ppoonk.airgo_master.product_semi_annual_price
+import io.github.ppoonk.airgo_master.product_status
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 @Serializable
 data class Product(
     val id: UInt,
+    @Contextual
     val createdAt: Instant,
+    @Contextual
     val updatedAt: Instant?,
     val name: String,
     val category: String,
@@ -78,7 +96,9 @@ data class SearchProduct(
 
 @Serializable
 data class FilterProduct(
+    @Contextual
     val createdAtStart: Instant? = null,
+    @Contextual
     val createdAtEnd: Instant? = null,
     val status: Int? = null,
     val category: String? = null
@@ -104,5 +124,22 @@ enum class ProductCategory {
     }
 }
 
+enum class ProductTableColumn(
+    val text: StringResource,
+    val width: Dp
+) {
+    ID(Res.string.product_id, 100.dp),
+    NAME(Res.string.product_name, 300.dp),
+    STATUS(Res.string.product_status, 100.dp),
+    CATEGORY(Res.string.product_category, 200.dp),
+    MONTHLY_PRICE(Res.string.product_monthly_price, 200.dp),
+    QUARTERLY_PRICE(Res.string.product_quarterly_price, 200.dp),
+    SEMI_ANNUAL_PRICE(Res.string.product_semi_annual_price, 200.dp),
+    ANNUAL_PRICE(Res.string.product_annual_price, 200.dp),
+    MAIN_IMAGE(Res.string.product_main_image, 200.dp),
+    CREATED_AT(Res.string.product_created_at, 150.dp),
+    OPERATE(Res.string.operate, 150.dp);
+
+}
 
 

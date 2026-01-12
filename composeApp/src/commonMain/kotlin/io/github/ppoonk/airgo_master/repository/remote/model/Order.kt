@@ -1,12 +1,16 @@
 package io.github.ppoonk.airgo_master.repository.remote.model
 
-import kotlinx.datetime.Instant
+
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 data class Order(
     val id: UInt,
+    @Contextual
     val createdAt: Instant,
+    @Contextual
     val updatedAt: Instant?,
     val orderNo: String,
     val outOrderNo: String?,
@@ -40,8 +44,10 @@ data class SearchOrderParams(
 
 @Serializable
 data class FilterOrderParams(
+    @Contextual
     val createdAtStart: Instant? = null,
+    @Contextual
     val createdAtEnd: Instant? = null,
-    val status: Instant? = null, 
+    val status: String? = null, 
     val paymentType: String? = null,
 )

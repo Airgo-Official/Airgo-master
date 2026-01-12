@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.ppoonk.ac.ui.component.ACCard
@@ -31,6 +34,7 @@ import io.github.ppoonk.airgo_master.LocalSharedVM
 import io.github.ppoonk.airgo_master.component.EditType
 import io.github.ppoonk.airgo_master.component.EmptyPlaceholder
 import io.github.ppoonk.airgo_master.navigation.toEditPayment
+import io.github.ppoonk.airgo_master.navigation.toEditPush
 import io.github.ppoonk.airgo_master.repository.remote.model.Status
 import kotlinx.coroutines.launch
 
@@ -45,55 +49,54 @@ fun PaymentScreen() {
     LaunchedEffect(Unit) {
         sharedVM.configurationVM.getPaymentList()
     }
-    Scaffold(
-        topBar = {
-            ACTopAppBar(
-                title = { },
-                actions = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            sharedVM.configurationVM.initEditPayment(EditType.CREATE)
-                            navController.toEditPayment()
-                        }
-                    }) {
-                        ACIconSmall(ACIconDefault.Plus, null)
-                    }
-                }
-            )
-        }
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().padding(it).padding(horizontal = 16.dp).imePadding(),
-        ) {
-            if (list.isEmpty()) {
-                item {
-                    EmptyPlaceholder()
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(onClick = {
+                    sharedVM.configurationVM.initEditPayment(EditType.CREATE)
+                    navController.toEditPayment()
+                }) {
+                    ACIconSmall(ACIconDefault.Plus, null)
                 }
-            } else {
-                items(list) { p ->
-                    ACCard(
-                        enabled = p.status == Status.ENABLE.ordinal,
-                        modifier = Modifier.fillMaxWidth()
-                            .clickable {
-                                sharedVM.configurationVM.initEditPayment(EditType.UPDATE, p)
-                                navController.toEditPayment()
-                            },
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        if (list.isEmpty()) {
+            item {
+                EmptyPlaceholder()  // TODO 其他列表
+            }
+        } else {
+            items(list) { p ->
+                Card(
+                    enabled = p.status == Status.ENABLE.ordinal,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        sharedVM.configurationVM.initEditPayment(EditType.UPDATE, p)
+                        navController.toEditPayment()
+                    },
+                ) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(16.dp),
                     ) {
-                        Column(
-                            Modifier.fillMaxWidth().padding(16.dp),
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(p.paymentType)
-                                Text(p.name)
-                            }
+                            Text(p.paymentType)
+                            Text(p.name)
                         }
                     }
-                    Spacer(Modifier.height(8.dp))
                 }
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
+

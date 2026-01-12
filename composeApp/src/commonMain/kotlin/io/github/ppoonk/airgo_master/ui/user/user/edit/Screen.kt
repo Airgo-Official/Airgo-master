@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -15,6 +16,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
 import io.github.ppoonk.ac.utils.StringUtils
 import io.github.ppoonk.ac.utils.diffObject
@@ -32,11 +33,21 @@ import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
 import io.github.ppoonk.airgo_master.LocalNavController
 import io.github.ppoonk.airgo_master.LocalSharedVM
+import io.github.ppoonk.airgo_master.Res
 import io.github.ppoonk.airgo_master.component.EditType
 import io.github.ppoonk.airgo_master.repository.Repository
 import io.github.ppoonk.airgo_master.repository.remote.model.RoleConst
 import io.github.ppoonk.airgo_master.repository.remote.model.Status
+import io.github.ppoonk.airgo_master.user_avatar
+import io.github.ppoonk.airgo_master.user_create
+import io.github.ppoonk.airgo_master.user_email
+import io.github.ppoonk.airgo_master.user_password
+import io.github.ppoonk.airgo_master.user_role
+import io.github.ppoonk.airgo_master.user_status
+import io.github.ppoonk.airgo_master.user_update
+import io.github.ppoonk.airgo_master.user_uuid
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,8 +64,8 @@ fun EditUserScreen() {
                 title = {
                     Text(
                         text = when (widget.editType) {
-                            EditType.CREATE -> "创建用户"
-                            EditType.UPDATE -> "编辑用户"
+                            EditType.CREATE -> stringResource(Res.string.user_create)
+                            EditType.UPDATE -> stringResource(Res.string.user_update)
                         }
                     )
                 },
@@ -121,15 +132,15 @@ fun EditUserScreen() {
     ) { paddingValues ->
         LazyColumn(
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp)
+            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp).widthIn(max= 600.dp)
         ) {
             if (widget.editType == EditType.CREATE) {
                 item {
-                    Text("邮箱")
-                    ACTextField(
+                    Text(stringResource(Res.string.user_email))
+                    TextField(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                         value = widget.email,
-                        onValueChange = { vm.refreshEmail(it) },
+                        onValueChange = { vm.editUserWidgetEmail(it) },
                         isError = widget.emailError.isNotEmpty(),
                         supportingText = { Text(widget.emailError) }
                     )
@@ -137,15 +148,15 @@ fun EditUserScreen() {
             }
 
             item {
-                Text("密码")
-                ACTextField(
+                Text(stringResource(Res.string.user_password))
+                TextField(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 0.dp),
                     value = widget.password,
-                    onValueChange = { vm.refreshPassword(it) },
+                    onValueChange = { vm.editUserWidgetPassword(it) },
                     isError = widget.passwordError.isNotEmpty(),
                     supportingText = { Text(widget.passwordError) },
                     trailingIcon = {
-                        IconButton(onClick = { vm.refreshPassword(StringUtils.newRandomPassword()) }) {
+                        IconButton(onClick = { vm.editUserWidgetPassword(StringUtils.newRandomPassword()) }) {
                             ACIconSmall(ACIconDefault.Sync, null)
                         }
                     }
@@ -157,58 +168,57 @@ fun EditUserScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                 ) {
-                    Text("状态")
+                    Text(stringResource(Res.string.user_status))
                     Switch(
                         checked = widget.status == Status.ENABLE,
-                        onCheckedChange = { vm.refreshStatus(it) },
+                        onCheckedChange = { vm.editUserWidgetStatus(it) },
                     )
                 }
             }
 
             item {
-                Text("角色")
+                Text(stringResource(Res.string.user_role))
                 ExposedDropdownMenuBox(
-                    expanded = widget.roleExpanded,
-                    onExpandedChange = { vm.refreshRoleExpanded() },
+                    expanded = widget.expandRole,
+                    onExpandedChange = { vm.editUserWidgetExpandRole() },
                 ) {
-                    ACTextField(
+                    TextField(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
                             .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                        value = widget.role.name,
+                        value = widget.role.i18n(),
                         onValueChange = {},
                         readOnly = true,
                         enabled = false
                     )
                     DropdownMenu(
-                        expanded = widget.roleExpanded,
-                        onDismissRequest = { vm.refreshRoleExpanded() }
+                        expanded = widget.expandRole,
+                        onDismissRequest = { vm.editUserWidgetExpandRole() }
                     ) {
                         RoleConst.entries.forEach { r ->
                             DropdownMenuItem(
-                                text = { Text(r.name) },
-                                onClick = { vm.refreshRole(r) }
+                                text = { Text(r.i18n()) },
+                                onClick = { vm.editUserWidgetRole(r) }
                             )
                         }
                     }
                 }
             }
             item {
-                Text("头像")
-                ACTextField(
+                Text(stringResource(Res.string.user_avatar))
+                TextField(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     value = widget.avatar,
-                    onValueChange = { vm.refreshAvatar(it) },
+                    onValueChange = { vm.editUserWidgetAvatar(it) },
                 )
             }
             item {
-                Text("UUID")
-                ACTextField(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                Text(stringResource(Res.string.user_uuid))
+                TextField(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     value = widget.uuid,
-                    onValueChange = {},
-                    readOnly = true,
+                    onValueChange = { vm.editUserWidgetUUID(it) },
                     trailingIcon = {
-                        IconButton(onClick = { vm.refreshUUID(StringUtils.newUUID()) }) {
+                        IconButton(onClick = { vm.editUserWidgetUUID(StringUtils.newUUID()) }) {
                             ACIconSmall(ACIconDefault.Sync, null)
                         }
                     }

@@ -1,15 +1,15 @@
 package io.github.ppoonk.airgo_master.ui.node.protocolTemplate.edit
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,17 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
-import io.github.ppoonk.ac.ui.component.ACLabelPrimary
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
 import io.github.ppoonk.ac.utils.diffObject
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
 import io.github.ppoonk.airgo_master.LocalNavController
 import io.github.ppoonk.airgo_master.LocalSharedVM
+import io.github.ppoonk.airgo_master.Res
 import io.github.ppoonk.airgo_master.component.EditType
+import io.github.ppoonk.airgo_master.protocol_template_create
+import io.github.ppoonk.airgo_master.protocol_template_inbounds
+import io.github.ppoonk.airgo_master.protocol_template_name
+import io.github.ppoonk.airgo_master.protocol_template_update
 import io.github.ppoonk.airgo_master.repository.Repository
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,10 +48,12 @@ fun EditProtocolTemplateScreen() {
             ACTopAppBar(
                 title = {
                     Text(
-                        when (widget.editType) {
-                            EditType.CREATE -> "创建协议模板"
-                            EditType.UPDATE -> "编辑协议模板"
-                        }
+                        stringResource(
+                            when (widget.editType) {
+                                EditType.CREATE -> Res.string.protocol_template_create
+                                EditType.UPDATE -> Res.string.protocol_template_update
+                            }
+                        )
                     )
                 },
                 navigationIcon = {
@@ -113,34 +119,27 @@ fun EditProtocolTemplateScreen() {
             )
         }
     ) { paddingValues ->
-        LazyColumn(modifier =  Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp)) {
-            stickyHeader {
-                ACLabelPrimary(
-                    "所有绑定该模板的节点，都会应用该模板的设置",
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
-                )
-            }
-
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp).widthIn(max = 600.dp)
+        ) {
             item {
-                Text("名称")
-                ACTextField(
+                Text(stringResource(Res.string.protocol_template_name))
+                TextField(
                     value = widget.name,
-                    onValueChange = { vm.protocolTemplateName(it) },
+                    onValueChange = { vm.editProtocolTemplateName(it) },
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                 )
-                Spacer(Modifier.height(16.dp))
             }
 
             item {
-                Text("Inbounds")
-                ACTextField(
+                Text(stringResource(Res.string.protocol_template_inbounds))
+                TextField(
                     value = widget.inbounds,
-                    onValueChange = { vm.protocolTemplateInbounds(it) },
+                    onValueChange = { vm.editProtocolTemplateInbounds(it) },
                     isError = widget.inboundsError.isNotEmpty(),
                     supportingText = { Text(widget.inboundsError) },
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     singleLine = false,
-                    maxLines = 26
                 )
             }
         }

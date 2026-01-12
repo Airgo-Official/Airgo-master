@@ -1,32 +1,107 @@
 <resources>
     <string name="drawer_slogan">AirGo Master</string>
-    <string name="home">主页</string>
-    <string name="me">我的</string>
-
-
+    <string name="copyright" translatable="false">Copyright © %1$d - %2$d Airgo. All Rights Reserved.</string>
 
     <string name="status">状态</string>
     <string name="all">全部</string>
     <string name="enable">启用</string>
     <string name="disable">禁用</string>
-
     <string name="time_range">时间范围</string>
-    <string name="confirm">确认</string>
-
     <string name="search_history">搜索历史</string>
     <string name="search_key">搜索关键字</string>
 
+    <string name="sign_in">登录</string>
     <string name="email">邮箱</string>
     <string name="password">密码</string>
-    <string name="sign_in">登录</string>
+    <string name="update_password">修改密码</string>
+    <string name="sign_out">退出</string>
+    <string name="sign_out_confirmation">确认退出吗？</string>
+
+    <string name="warning">警告！</string>
+    <string name="data_empty">数据为空</string>
+    <string name="email_format_tip">邮箱格式: 123@qq.com，6~40位</string>
+    <string name="password_format_tip">密码格式：123!@%_abc，6~40位</string>
+    <string name="number_with_two_decimals_tip">请输入数字 (两位小数)</string>
+    <string name="number_tip">请输入数字</string>
+
+    <string name="operate">操作</string>
+    <string name="delete">删除</string>
+    <string name="delete_confirmation">删除后数据无法恢复，确认删除吗?</string>
+    <string name="reset">重置</string>
+    <string name="more">更多</string>
+    <string name="confirm">确认</string>
+
+    <string name="user">用户</string>
+    <string name="user_detail">User detail</string>
+    <string name="user_id">ID</string>
+    <string name="user_created_at">创建时间</string>
+    <string name="user_email">Email</string>
+    <string name="user_password">密码</string>
+    <string name="user_status">状态</string>
+    <string name="user_avatar">头像</string>
+    <string name="user_uuid">UUID</string>
+    <string name="user_role">角色</string>
+    <string name="user_list">用户列表</string>
+    <string name="user_create">创建用户</string>
+    <string name="user_update">编辑用户</string>
+    <string name="user_role_admin">管理员</string>
+    <string name="user_role_normal">普通用户</string>
+
+    <string name="ticket">工单</string>
+
+    <string name="store">商店</string>
+
+    <string name="order">订单</string>
+
+    <string name="product">商品</string>
+    <string name="product_create">创建商品</string>
+    <string name="product_update">更新商品</string>
+    <string name="product_associated_protocol">关联节点协议</string>
+    <string name="product_id">ID</string>
+    <string name="product_created_at">创建时间</string>
+    <string name="product_name">名称</string>
+    <string name="product_category">分类</string>
+    <string name="product_detail">详情</string>
+    <string name="product_status">状态</string>
+    <string name="product_main_image">主图</string>
+    <string name="product_monthly_price">月付价格</string>
+    <string name="product_quarterly_price">季付价格</string>
+    <string name="product_semi_annual_price">半年付价格</string>
+    <string name="product_annual_price">年付价格</string>
+    <string name="product_category_subscribe">订阅商品</string>
+    <string name="product_category_normal">普通商品</string>
+
+    <string name="coupon">优惠券</string>
+    <string name="coupon_type_threshold">满减券</string>
+    <string name="coupon_type_discount_rate">折扣券</string>
+    <string name="coupon_create">创建优惠券</string>
+    <string name="coupon_update">更新优惠券</string>
+    <string name="coupon_id">ID</string>
+    <string name="coupon_name">名称</string>
+    <string name="coupon_status">状态</string>
+    <string name="coupon_code">优惠券码</string>
+    <string name="coupon_type">优惠券类型</string>
+    <string name="coupon_discount">优惠值</string>
+    <string name="coupon_min_order_amount">最小订单金额</string>
+    <string name="coupon_created_at">创建时间</string>
+    <string name="coupon_associated_product">关联商品</string>
 
     <string name="node">节点</string>
-    <string name="edit_node">编辑节点</string>
-    <string name="node_details">节点详情</string>
+    <string name="node_id">ID</string>
+    <string name="node_name">名称</string>
+    <string name="node_status">状态</string>
+    <string name="node_config">配置</string>
+    <string name="node_created_at">创建时间</string>
+    <string name="node_info">节点基础信息</string>
+    <string name="node_edit">编辑节点</string>
+    <string name="node_create">创建节点</string>
+    <string name="node_update">更新节点</string>
+    <string name="node_detail">节点详情</string>
 
     <string name="protocol_list">协议列表</string>
-    <string name="unknown_protocol">未知协议</string>
-    <string name="create_protocol">新建协议</string>
+    <string name="protocol_unknown">未知协议</string>
+    <string name="protocol_create">新建协议</string>
+    <string name="protocol_update">更新协议</string>
     <string name="protocol_name">名称</string>
     <string name="protocol_address">地址</string>
     <string name="protocol_port">端口</string>
@@ -34,21 +109,37 @@
     <string name="protocol_inbounds">出站</string>
     <string name="protocol_no_template">不使用模板</string>
 
-    <string name="log_title">日志</string>
-    <string name="log_clear">清空</string>
-    <string name="log_status_stopped">已经停止</string>
-    <string name="log_status_recording">正在记录</string>
+    <string name="protocol_template">协议模板</string>
+    <string name="protocol_template_id">ID</string>
+    <string name="protocol_template_name">名称</string>
+    <string name="protocol_template_created_at">创建时间</string>
+    <string name="protocol_template_inbounds">Inbounds</string>
+    <string name="protocol_template_create">创建协议模板</string>
+    <string name="protocol_template_update">更新协议模板</string>
 
-    <string name="warning">警告！</string>
-    <string name="delete_confirmation">删除后数据无法恢复，确认删除吗?</string>
-    <string name="data_empty">数据为空</string>
-    <string name="email_format_tip">邮箱格式: 123@qq.com，6~40位</string>
-    <string name="password_format_tip">密码格式：123!@%_abc，6~40位</string>
-    <string name="number_with_two_decimals_tip">请输入数字 (两位小数)</string>
-    <string name="number_tip">请输入数字</string>
-
-    <string name="product_category_subscribe">订阅商品</string>
-    <string name="product_category_normal">普通商品</string>
-
+    <string name="configuration">配置</string>
+    <string name="configuration_api_base_url">api 地址</string>
+    <string name="configuration_api_base_url_placeholder">http://xxxxxx.com:8000</string>
+    <string name="configuration_backend">服务端</string>
+    <string name="configuration_backend_token_sign">Token 签名</string>
+    <string name="configuration_backend_token_duration">Token 有效期</string>
+    <string name="configuration_backend_admin_path">管理员安全路径</string>
+    <string name="configuration_backend_admin_path_placeholder">/admin</string>
+    <string name="configuration_push">推送</string>
+    <string name="configuration_push_name">Name</string>
+    <string name="configuration_push_status">Status</string>
+    <string name="configuration_push_type">Type</string>
+    <string name="configuration_push_create">新建推送</string>
+    <string name="configuration_push_update">更新推送</string>
+    <string name="configuration_payment">支付</string>
+    <string name="configuration_payment_create">创建支付</string>
+    <string name="configuration_payment_update">更新支付</string>
+    <string name="configuration_payment_name">Name</string>
+    <string name="configuration_payment_status">Status</string>
+    <string name="configuration_payment_type">Type</string>
+    <string name="configuration_log">日志</string>
+    <string name="configuration_log_clear">清空</string>
+    <string name="configuration_log_status_stopped">已经停止</string>
+    <string name="configuration_log_status_recording">正在记录</string>
 
 </resources>

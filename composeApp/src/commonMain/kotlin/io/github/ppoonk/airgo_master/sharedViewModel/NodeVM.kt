@@ -84,11 +84,11 @@ class NodeVM() : ViewModel() {
         }
     }
 
-    fun protocolTemplateName(v: String): Unit {
+    fun editProtocolTemplateName(v: String): Unit {
         _editProtocolTemplateWidget.value = _editProtocolTemplateWidget.value.copy(name = v)
     }
 
-    fun protocolTemplateInbounds(v: String): Unit {
+    fun editProtocolTemplateInbounds(v: String): Unit {
         val err = when (val r = ValidationUtils.validateJson(v)) {
             is ValidationResult.Failure -> r.error
             is ValidationResult.Success -> ""
@@ -99,7 +99,6 @@ class NodeVM() : ViewModel() {
 
 
     // 协议
-
     suspend fun getCurrentProductProtocolList(productId: UInt): List<UInt> {
         var result: List<Protocol> = emptyList()
         Repository.remote.getProtocolList(
@@ -175,47 +174,47 @@ class NodeVM() : ViewModel() {
     }
 
 
-    fun protocolNodeId(v: UInt): Unit {
+    fun editProtocolWidgetNodeId(v: UInt): Unit {
         _editProtocolWidget.value = _editProtocolWidget.value.copy(nodeId = v)
     }
 
-    fun protocolName(v: String): Unit {
+    fun editProtocolWidgetName(v: String): Unit {
         _editProtocolWidget.value = _editProtocolWidget.value.copy(name = v)
     }
 
-    fun protocolAddress(v: String): Unit {
+    fun editProtocolWidgetAddress(v: String): Unit {
         _editProtocolWidget.value = _editProtocolWidget.value.copy(address = v)
     }
 
-    fun protocolPort(v: String): Unit {
+    fun editProtocolWidgetPort(v: String): Unit {
         _editProtocolWidget.value = _editProtocolWidget.value.copy(
             port = v.onlyNumberIfEmptyZero().toInt().coerceIn(1, 65535)
         )
     }
 
-    fun expandedBind(): Unit {
+    fun editProtocolWidgetExpandBind(): Unit {
         _editProtocolWidget.value =
-            _editProtocolWidget.value.copy(expandedBind = !_editProtocolWidget.value.expandedBind)
+            _editProtocolWidget.value.copy(expandBind = !_editProtocolWidget.value.expandBind)
     }
 
-    fun protocolNoTemp(): Unit {
-        _editProtocolWidget.value = _editProtocolWidget.value.copy(
-            templateId = null,
-            expandedBind = !_editProtocolWidget.value.expandedBind,
-            selectedTemplateName = "不使用模板" // TODO
-        )
-    }
-
-    fun protocolTemp(v: ProtocolTemplate): Unit {
+    fun editProtocolWidgetTemp(v: ProtocolTemplate?): Unit {
+        if (v == null) {
+            _editProtocolWidget.value = _editProtocolWidget.value.copy(
+                templateId = null,
+                expandBind = !_editProtocolWidget.value.expandBind,
+                selectedTemplateName = "不使用模板" // TODO
+            )
+            return
+        }
         _editProtocolWidget.value = _editProtocolWidget.value.copy(
             templateId = v.id,
             inbounds = v.inbounds,
-            expandedBind = !_editProtocolWidget.value.expandedBind,
+            expandBind = !_editProtocolWidget.value.expandBind,
             selectedTemplateName = v.name
         )
     }
 
-    fun protocolInbounds(v: String): Unit {
+    fun editProtocolWidgetInbounds(v: String): Unit {
         when (val r = ValidationUtils.validateJson(v)) {
             is ValidationResult.Failure -> {
                 _editProtocolWidget.value = _editProtocolWidget.value.copy(
@@ -238,7 +237,7 @@ class NodeVM() : ViewModel() {
 
     private val _currentNode = MutableStateFlow<Node?>(null)
     val currentNode: StateFlow<Node?> = _currentNode
-    fun refreshCurrentNode(new: Node): Unit {
+    fun refreshCurrentNode(new: Node): Unit { // TODO 是否删除
         _currentNode.value = new
     }
 
@@ -314,7 +313,7 @@ class NodeVM() : ViewModel() {
 
     }
 
-    fun nodeName(v: String): Unit {
+    fun editNodeWidgetName(v: String): Unit {
         val err = when (val r = ValidationUtils.validateEmpty(v)) {
             is ValidationResult.Failure -> r.error
 
@@ -323,14 +322,14 @@ class NodeVM() : ViewModel() {
         _editNodeWidget.value = _editNodeWidget.value.copy(name = v, nameError = err)
     }
 
-    fun nodeStatus(v: Boolean): Unit {
+    fun editNodeWidgetStatus(v: Boolean): Unit {
         _editNodeWidget.value =
             _editNodeWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
     }
 
-    fun nodeConfig(v: String): Unit {
-        var err = ""
-        var c = ""
+    fun editNodeWidgetConfig(v: String): Unit {
+        var err: String
+        var c: String
         when (val r = ValidationUtils.validateJson(v)) {
             is ValidationResult.Failure -> {
                 err = r.error
@@ -342,7 +341,11 @@ class NodeVM() : ViewModel() {
                 c = r.res
             }
         }
-        _editNodeWidget.value = _editNodeWidget.value.copy(config = v, configError = err)
+        _editNodeWidget.value = _editNodeWidget.value.copy(config = c, configError = err)
+    }
+
+    fun editNodeWidgetShowConfig(): Unit {
+        _editNodeWidget.value = _editNodeWidget.value.copy(showNodeConfig = !_editNodeWidget.value.showNodeConfig)
     }
 
 }
@@ -392,7 +395,7 @@ data class EditProtocolWidget(
     val port: Int = 80,
 
     val inboundsError: String = "",
-    val expandedBind: Boolean = false,
+    val expandBind: Boolean = false,
     val selectedTemplateName: String = "不使用模板",
 
     val oldUpdateProtocolReq: UpdateProtocolReq = UpdateProtocolReq(),
@@ -443,6 +446,7 @@ data class EditNodeWidget(
     val oldUpdateNodeReq: UpdateNodeReq = UpdateNodeReq(),
 
     val editType: EditType = EditType.CREATE,
+    val showNodeConfig: Boolean = false,
 
     ) {
     val createIsValid: Boolean

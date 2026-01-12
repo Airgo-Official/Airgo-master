@@ -32,7 +32,7 @@ fun ServiceAgreementScreen(): Unit {
                 modifier = Modifier
                     .height(90.dp)
                     .padding(bottom = 5.dp),
-                title = { Text("") },
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = {
                         scope.launch {

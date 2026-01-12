@@ -16,7 +16,6 @@ import io.github.ppoonk.airgo_master.ui.sign.signin.SignInScreen
 import io.github.ppoonk.airgo_master.ui.splash.SplashScreen
 import io.github.ppoonk.airgo_master.ui.store.coupon.edit.EditCouponScreen
 import io.github.ppoonk.airgo_master.ui.store.product.edit.EditProductScreen
-import io.github.ppoonk.airgo_master.ui.user.user.details.DetailUserScreen
 import io.github.ppoonk.airgo_master.ui.user.user.edit.EditUserScreen
 import kotlinx.serialization.Serializable
 
@@ -80,7 +79,7 @@ fun NavController.toMain(popUpTo: Routes) = navigate(Routes.Main) {
 
 fun NavController.toEditNode() = navigate(Routes.EditNode) { launchSingleTop = true }
 
-fun NavController.toNodeDetails() = navigate(Routes.DetailNode) { launchSingleTop = true }
+fun NavController.toDetailNode() = navigate(Routes.DetailNode) { launchSingleTop = true }
 
 fun NavController.toEditProtocol() = navigate(Routes.EditProtocol) { launchSingleTop = true }
 
@@ -100,8 +99,6 @@ fun NavController.toEditPush() = navigate(Routes.EditPush) { launchSingleTop = t
 
 
 fun NavController.toEditUser() = navigate(Routes.EditUser) { launchSingleTop = true }
-
-fun NavController.toDetailUser() = navigate(Routes.DetailUser) { launchSingleTop = true }
 
 @OptIn(ExperimentalLayoutApi::class)
 fun NavGraphBuilder.allGraph(): Unit {
@@ -131,6 +128,4 @@ fun NavGraphBuilder.allGraph(): Unit {
     composable<Routes.EditPush> { EditPushScreen() }
 
     composable<Routes.EditUser> { EditUserScreen() }
-
-    composable<Routes.DetailUser> { DetailUserScreen() }
 }

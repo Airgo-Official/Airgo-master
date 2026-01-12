@@ -1,11 +1,15 @@
 package io.github.ppoonk.airgo_master.sharedViewModel
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import io.github.ppoonk.ac.utils.ValidationResult
 import io.github.ppoonk.ac.utils.ValidationUtils
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
+import io.github.ppoonk.airgo_master.Res
 import io.github.ppoonk.airgo_master.component.EditType
+import io.github.ppoonk.airgo_master.configuration_log_status_recording
+import io.github.ppoonk.airgo_master.configuration_log_status_stopped
 import io.github.ppoonk.airgo_master.repository.Repository
 import io.github.ppoonk.airgo_master.repository.remote.model.AlipayConfig
 import io.github.ppoonk.airgo_master.repository.remote.model.EmailConfig
@@ -25,6 +29,7 @@ import io.github.ppoonk.airgo_master.repository.remote.model.UpdatePushListReq
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import org.jetbrains.compose.resources.stringResource
 
 class ConfigurationVM : ViewModel() {
     private val _currentPayment = MutableStateFlow<Payment?>(null)
@@ -40,19 +45,19 @@ class ConfigurationVM : ViewModel() {
             }
     }
 
-    private val _paymentWidget = MutableStateFlow(PaymentWidget())
-    val paymentWidget: StateFlow<PaymentWidget> = _paymentWidget
+    private val _editPaymentWidget = MutableStateFlow(EditPaymentWidget())
+    val editPaymentWidget: StateFlow<EditPaymentWidget> = _editPaymentWidget
 
 
     fun initEditPayment(editType: EditType, current: Payment? = null): Unit {
         when (editType) {
-            EditType.CREATE -> _paymentWidget.value = PaymentWidget()
+            EditType.CREATE -> _editPaymentWidget.value = EditPaymentWidget()
 
             EditType.UPDATE -> {
 
                 current?.let { p ->
                     _currentPayment.value = current
-                    _paymentWidget.value = PaymentWidget(
+                    _editPaymentWidget.value = EditPaymentWidget(
                         name = p.name,
                         status = Status.entries[p.status],
                         paymentType = PaymentType.valueOf(p.paymentType.uppercase()),
@@ -68,72 +73,79 @@ class ConfigurationVM : ViewModel() {
         }
     }
 
+    fun paymentName(v: String): Unit {
+        val err = when (val r = ValidationUtils.validateEmpty(v)) {
+            is ValidationResult.Failure -> r.error
+            is ValidationResult.Success -> ""
+        }
+        if (err.isNotEmpty()) {
+            _editPaymentWidget.value = _editPaymentWidget.value.copy(name = v, nameError = err)
+            return
+        }
 
-    fun refreshPaymentName(v: String): Unit {
-        // TODO 判空
-        val isExist = when (_paymentWidget.value.editType) {
+        val isExist = when (_editPaymentWidget.value.editType) {
             EditType.CREATE -> _paymentList.value.any { it.name == v }
-            EditType.UPDATE -> _paymentWidget.value.paymentList.any { it.name == v }
+            EditType.UPDATE -> _editPaymentWidget.value.paymentList.any { it.name == v }
         }
         val nameError = if (isExist) "该名称已存在" else ""
-        _paymentWidget.value = _paymentWidget.value.copy(name = v, nameError = nameError)
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(name = v, nameError = nameError)
     }
 
-    fun refreshPaymentStatus(v: Boolean): Unit {
-        _paymentWidget.value =
-            _paymentWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
+    fun paymentStatus(v: Boolean): Unit {
+        _editPaymentWidget.value =
+            _editPaymentWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
     }
 
-    fun refreshPaymentTypeExpanded(): Unit {
-        _paymentWidget.value =
-            _paymentWidget.value.copy(paymentTypeExpanded = !_paymentWidget.value.paymentTypeExpanded)
+    fun paymentTypeExpanded(): Unit {
+        _editPaymentWidget.value =
+            _editPaymentWidget.value.copy(paymentTypeExpanded = !_editPaymentWidget.value.paymentTypeExpanded)
     }
 
-    fun refreshPaymentType(v: PaymentType): Unit {
-        _paymentWidget.value =
-            _paymentWidget.value.copy(paymentType = v, paymentTypeExpanded = false)
+    fun paymentType(v: PaymentType): Unit {
+        _editPaymentWidget.value =
+            _editPaymentWidget.value.copy(paymentType = v, paymentTypeExpanded = false)
     }
 
-    fun refreshAlipayConfig(v: AlipayConfig): Unit {
-        _paymentWidget.value = _paymentWidget.value.copy(alipayConfig = v)
+    fun alipayConfig(v: AlipayConfig): Unit {
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(alipayConfig = v)
     }
 
-    fun refreshEpayConfig(v: EpayConfig): Unit {
-        _paymentWidget.value = _paymentWidget.value.copy(epayConfig = v)
+    fun epayConfig(v: EpayConfig): Unit {
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(epayConfig = v)
     }
 
-    fun refreshStripeConfig(v: StripeConfig): Unit {
-        _paymentWidget.value = _paymentWidget.value.copy(stripeConfig = v)
+    fun stripeConfig(v: StripeConfig): Unit {
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(stripeConfig = v)
     }
 
-    fun refreshTronConfig(v: TronConfig): Unit {
-        _paymentWidget.value = _paymentWidget.value.copy(tronConfig = v)
+    fun tronConfig(v: TronConfig): Unit {
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(tronConfig = v)
     }
 
-    fun refreshTronToken(v: TronToken, isAdd: Boolean): Unit {
-        val tokens = _paymentWidget.value.tronConfig.acceptTokens.toMutableList()
+    fun tronToken(v: TronToken, isAdd: Boolean): Unit {
+        val tokens = _editPaymentWidget.value.tronConfig.acceptTokens.toMutableList()
         if (isAdd) {
             tokens.add(v.name)
         } else {
             tokens.remove(v.name)
         }
-        _paymentWidget.value = _paymentWidget.value.copy(
-            tronConfig = _paymentWidget.value.tronConfig.copy(acceptTokens = tokens.toList())
+        _editPaymentWidget.value = _editPaymentWidget.value.copy(
+            tronConfig = _editPaymentWidget.value.tronConfig.copy(acceptTokens = tokens.toList())
         )
     }
 
 
-    fun updatePaymentReq(): UpdatePaymentListReq {
-        val updatedList = when (_paymentWidget.value.editType) {
-            EditType.CREATE -> _paymentList.value.plus(_paymentWidget.value.toPayment())
+    fun toUpdatePaymentReq(): UpdatePaymentListReq {
+        val updatedList = when (_editPaymentWidget.value.editType) {
+            EditType.CREATE -> _paymentList.value.plus(_editPaymentWidget.value.toPayment())
 
-            EditType.UPDATE -> _paymentWidget.value.paymentList.plus(_paymentWidget.value.toPayment())
+            EditType.UPDATE -> _editPaymentWidget.value.paymentList.plus(_editPaymentWidget.value.toPayment())
         }
         return UpdatePaymentListReq(updatedList)
     }
 
-    fun deletePaymentReq(): UpdatePaymentListReq {
-        return UpdatePaymentListReq(_paymentWidget.value.paymentList)
+    fun toDeletePaymentReq(): UpdatePaymentListReq {
+        return UpdatePaymentListReq(_editPaymentWidget.value.paymentList)
     }
 
 
@@ -142,7 +154,7 @@ class ConfigurationVM : ViewModel() {
             .onFailure { }
             .onSuccess { r ->
                 r.data?.let {
-                    _securityWidget.value = _securityWidget.value.copy(
+                    _editSecurityWidget.value = _editSecurityWidget.value.copy(
                         adminPath = it.adminPath,
                         tokenSign = it.tokenSign,
                         tokenDuration = it.tokenDuration.toString()
@@ -151,50 +163,50 @@ class ConfigurationVM : ViewModel() {
             }
     }
 
-    private val _securityWidget = MutableStateFlow<SecurityWidget>(SecurityWidget())
-    val securityWidget: StateFlow<SecurityWidget> = _securityWidget
+    private val _editSecurityWidget = MutableStateFlow<EditSecurityWidget>(EditSecurityWidget())
+    val editSecurityWidget: StateFlow<EditSecurityWidget> = _editSecurityWidget
 
 
     fun localApiUrl(v: String): Unit {
-        _securityWidget.value = _securityWidget.value.copy(localApiUrl = v)
+        _editSecurityWidget.value = _editSecurityWidget.value.copy(localApiUrl = v)
         Repository.local.setBaseUrl(v)
     }
 
     fun localAdminPath(v: String): Unit {
-        _securityWidget.value = _securityWidget.value.copy(localAdminPath = v)
+        _editSecurityWidget.value = _editSecurityWidget.value.copy(localAdminPath = v)
         Repository.local.setAdminPath(v)
     }
 
-    fun refreshAdminPath(v: String): Unit {
+    fun adminPath(v: String): Unit {
         val err = when (val r = ValidationUtils.validateEmpty(v)) {
             is ValidationResult.Failure -> r.error
             is ValidationResult.Success -> ""
         }
-        _securityWidget.value = _securityWidget.value.copy(
+        _editSecurityWidget.value = _editSecurityWidget.value.copy(
             adminPath = v,
             adminPathError = err
         )
     }
 
-    fun refreshTokenSign(v: String): Unit {
+    fun tokenSign(v: String): Unit {
         val err = when (val r = ValidationUtils.validateEmpty(v)) {
             is ValidationResult.Failure -> r.error
             is ValidationResult.Success -> ""
         }
 
-        _securityWidget.value = _securityWidget.value.copy(
+        _editSecurityWidget.value = _editSecurityWidget.value.copy(
             tokenSign = v,
             tokenSignError = err
         )
     }
 
-    fun refreshTokenDuration(v: String): Unit {
+    fun tokenDuration(v: String): Unit {
         val err =
             when (val r = ValidationUtils.validateNumber(v, 60..3600 * 720 * 365)) { // 60秒 ～ 1年
                 is ValidationResult.Failure -> r.error
                 is ValidationResult.Success -> ""
             }
-        _securityWidget.value = _securityWidget.value.copy(
+        _editSecurityWidget.value = _editSecurityWidget.value.copy(
             tokenDuration = v,
             tokenDurationError = err
         )
@@ -203,12 +215,12 @@ class ConfigurationVM : ViewModel() {
 
     fun initEditPush(editType: EditType, p: Push? = null): Unit {
         when (editType) {
-            EditType.CREATE -> _pushWidget.value = PushWidget()
+            EditType.CREATE -> _editPushWidget.value = EditPushWidget()
 
             EditType.UPDATE -> {
                 _currentPush.value = p
                 p?.let { p ->
-                    _pushWidget.value = PushWidget(
+                    _editPushWidget.value = EditPushWidget(
                         name = p.name,
                         status = Status.entries[p.status],
                         pushType = PushType.valueOf(p.pushType),
@@ -236,49 +248,61 @@ class ConfigurationVM : ViewModel() {
             }
     }
 
-    private val _pushWidget = MutableStateFlow<PushWidget>(PushWidget())
-    val pushWidget: StateFlow<PushWidget> = _pushWidget
+    private val _editPushWidget = MutableStateFlow<EditPushWidget>(EditPushWidget())
+    val editPushWidget: StateFlow<EditPushWidget> = _editPushWidget
 
     fun refreshPushName(v: String): Unit {
-        // TODO 判空
-        // 重复
-        _pushWidget.value = _pushWidget.value.copy(name = v)
+        val err = when (val r = ValidationUtils.validateEmpty(v)) {
+            is ValidationResult.Failure -> r.error
+            is ValidationResult.Success -> ""
+        }
+        if (err.isNotEmpty()) {
+            _editPushWidget.value = _editPushWidget.value.copy(name = v, nameError = err)
+            return
+        }
+
+        val isExist = when (_editPushWidget.value.editType) {
+            EditType.CREATE -> _pushList.value.any { it.name == v }
+            EditType.UPDATE -> _editPushWidget.value.pushList.any { it.name == v }
+        }
+        val nameError = if (isExist) "该名称已存在" else ""
+        _editPushWidget.value = _editPushWidget.value.copy(name = v, nameError = nameError)
     }
 
-    fun refreshPushStatus(v: Boolean): Unit {
-        _pushWidget.value =
-            _pushWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
+    fun pushStatus(v: Boolean): Unit {
+        _editPushWidget.value =
+            _editPushWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
     }
 
-    fun refreshPushTypeExpanded(): Unit {
-        _pushWidget.value =
-            _pushWidget.value.copy(pushTypeExpanded = !_pushWidget.value.pushTypeExpanded)
+    fun expandPushType(): Unit {
+        _editPushWidget.value =
+            _editPushWidget.value.copy(expandPushType = !_editPushWidget.value.expandPushType)
     }
 
-    fun refreshPushType(v: PushType): Unit {
-        _pushWidget.value =
-            _pushWidget.value.copy(pushType = v, pushTypeExpanded = false)
+    fun pushType(v: PushType): Unit {
+        _editPushWidget.value =
+            _editPushWidget.value.copy(pushType = v, expandPushType = false)
     }
 
-    fun refreshTgBotConfig(v: TgBotConfig): Unit {
-        _pushWidget.value = _pushWidget.value.copy(tgBotConfig = v)
+    fun tgBotConfig(v: TgBotConfig): Unit {
+        _editPushWidget.value = _editPushWidget.value.copy(tgBotConfig = v)
     }
 
-    fun refreshEmailConfig(v: EmailConfig): Unit {
-        _pushWidget.value = _pushWidget.value.copy(emailConfig = v)
+    fun emailConfig(v: EmailConfig): Unit {
+        _editPushWidget.value = _editPushWidget.value.copy(emailConfig = v)
     }
 
-    fun updatePushReq(): UpdatePushListReq {
-        val updatedList = when (_pushWidget.value.editType) {
-            EditType.CREATE -> _pushList.value.plus(_pushWidget.value.toPush())
+    fun toUpdatePushReq(): UpdatePushListReq {
+        val updatedList = when (_editPushWidget.value.editType) {
+            EditType.CREATE -> _pushList.value.plus(_editPushWidget.value.toPush())
 
-            EditType.UPDATE -> _pushWidget.value.pushList.plus(_pushWidget.value.toPush())
+            EditType.UPDATE -> _editPushWidget.value.pushList.plus(_editPushWidget.value.toPush())
         }
         return UpdatePushListReq(updatedList)
     }
 
-    fun deletePushReq(): UpdatePushListReq {
-        return UpdatePushListReq(_pushWidget.value.pushList)
+    fun toDeletePushReq(): UpdatePushListReq {
+        return UpdatePushListReq(_editPushWidget.value.pushList)
     }
 
 
@@ -286,11 +310,11 @@ class ConfigurationVM : ViewModel() {
     private val _logList = MutableStateFlow<List<String>>(emptyList())
     val logList: StateFlow<List<String>> = _logList
 
-    private val _displayLog = MutableStateFlow<Boolean>(false)
-    val displayLog: StateFlow<Boolean> = _displayLog
+    private val _logStatus = MutableStateFlow<LogStatus>(LogStatus.STOPPED)
+    val logStatus: StateFlow<LogStatus> = _logStatus
 
-    fun displayLog(v: Boolean): Unit {
-        _displayLog.value = v
+    fun logStatus(v: LogStatus): Unit {
+        _logStatus.value = v
     }
 
     fun addLog(log: String): Unit {
@@ -306,7 +330,7 @@ class ConfigurationVM : ViewModel() {
 
 }
 
-data class SecurityWidget(
+data class EditSecurityWidget(
     // 登录时设置的
     val localApiUrl: String = Repository.local.getBaseUrl() ?: "",
     val localAdminPath: String = Repository.local.getAdminPath() ?: "",
@@ -334,7 +358,7 @@ data class SecurityWidget(
 }
 
 
-data class PaymentWidget(
+data class EditPaymentWidget(
     val id: UInt = 0u,
     val name: String = "",
     val status: Status = Status.ENABLE,
@@ -384,7 +408,7 @@ data class PaymentWidget(
     }
 }
 
-data class PushWidget(
+data class EditPushWidget(
     val name: String = "",
     val status: Status = Status.ENABLE,
     val pushType: PushType = PushType.EMAIL,
@@ -392,7 +416,7 @@ data class PushWidget(
     val tgBotConfig: TgBotConfig = TgBotConfig(),
 
     val nameError: String = "",
-    val pushTypeExpanded: Boolean = false,
+    val expandPushType: Boolean = false,
 
     val pushList: List<Push> = emptyList(),
     val editType: EditType = EditType.CREATE,
@@ -413,3 +437,16 @@ data class PushWidget(
         return p
     }
 }
+enum class LogStatus{
+    STOPPED,
+    RECORDING;
+    @Composable
+    fun i18n(): String {
+        return when (this) {
+            STOPPED -> stringResource(Res.string.configuration_log_status_stopped)
+            RECORDING -> stringResource(Res.string.configuration_log_status_recording)
+        }
+    }
+}
+
+

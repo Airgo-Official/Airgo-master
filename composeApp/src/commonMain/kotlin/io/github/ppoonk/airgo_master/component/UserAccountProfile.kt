@@ -3,6 +3,7 @@ package io.github.ppoonk.airgo_master.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,9 +26,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import io.github.ppoonk.ac.ui.component.ACIconDefault
+import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.ac.ui.component.AutoSizeFade
 import io.github.ppoonk.airgo_master.LocalNavController
 import io.github.ppoonk.airgo_master.LocalSharedVM
+import io.github.ppoonk.airgo_master.LocalThemeManager
 import io.github.ppoonk.airgo_master.Res
 import io.github.ppoonk.airgo_master.defaultAvatar
 import io.github.ppoonk.airgo_master.navigation.toMe
@@ -44,9 +50,9 @@ fun UserAccountProfile(): Unit {
     val signedInUser by sharedVM.userVM.signedInUser.collectAsState()
 
     AutoSizeFade(
-        compact = { Expanded(scope, sharedVM, navController, signedInUser) },
-        medium = { Medium(scope, sharedVM, navController, signedInUser) },
-        expanded = { Expanded(scope, sharedVM, navController, signedInUser) },
+        compact = { Expanded(scope, navController, signedInUser) },
+        medium = { Medium(scope, navController, signedInUser) },
+        expanded = { Expanded(scope, navController, signedInUser) },
     )
 
 }
@@ -55,7 +61,6 @@ fun UserAccountProfile(): Unit {
 @Composable
 private fun Medium(
     scope: CoroutineScope,
-    sharedVM: SharedVM,
     navController: NavHostController,
     signedInUser: User?
 ): Unit {
@@ -79,37 +84,47 @@ private fun Medium(
 @Composable
 private fun Expanded(
     scope: CoroutineScope,
-    sharedVM: SharedVM,
     navController: NavHostController,
     signedInUser: User?
 ): Unit {
-
-    Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(16.dp).height(40.dp).fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
-            .clickable {
-                scope.launch {
-                    navController.toMe()
-                }
-            }
+    val themeManager = LocalThemeManager.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        signedInUser?.let {
-            AsyncImage(
-                it.avatar,
-                null,
-                modifier = Modifier.padding(end = 8.dp).size(40.dp).clip(CircleShape),
-                error = painterResource(Res.drawable.defaultAvatar),
-                placeholder = painterResource(Res.drawable.defaultAvatar),
+        IconButton(onClick = { themeManager.toggleTheme() }) {
+            ACIconSmall(
+                if (themeManager.isDarkTheme) ACIconDefault.Moon else ACIconDefault.Sun,
+                null
             )
-            Text(
-                it.email,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.height(40.dp).fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
+                .clickable {
+                    scope.launch {
+                        navController.toMe()
+                    }
+                }
+        ) {
+            signedInUser?.let {
+                AsyncImage(
+                    it.avatar,
+                    null,
+                    modifier = Modifier.padding(end = 8.dp).size(40.dp).clip(CircleShape),
+                    error = painterResource(Res.drawable.defaultAvatar),
+                    placeholder = painterResource(Res.drawable.defaultAvatar),
+                )
+                Text(
+                    it.email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

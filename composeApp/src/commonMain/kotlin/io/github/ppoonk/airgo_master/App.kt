@@ -2,6 +2,7 @@ package io.github.ppoonk.airgo_master
 
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -19,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import io.github.ppoonk.ac.ui.component.ACAppRoute
 import io.github.ppoonk.ac.ui.component.ACSnackbar
+import io.github.ppoonk.ac.ui.component.ThemeManager
 import io.github.ppoonk.ac.ui.theme.ACTheme
 import io.github.ppoonk.ac.utils.ApiHttpClient
 import io.github.ppoonk.ac.utils.DefaultHandleHttpStatus
@@ -44,16 +46,26 @@ val LocalSharedVM = staticCompositionLocalOf<SharedVM> {
 val LocalDrawerState = staticCompositionLocalOf<DrawerState> {
     error("LocalDrawerState not provided")
 }
+val LocalPlatform = staticCompositionLocalOf<Platform> {
+    error("LocalPlatform not provided")
+}
+val LocalThemeManager = staticCompositionLocalOf<ThemeManager> {
+    error("ThemeManager not provided!")
+}
+
 
 @Composable
 fun App() {
-    ACTheme {
-        val navController: NavHostController = rememberNavController()
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val snackbarHostState = remember { SnackbarHostState() }
-        val sharedVM = SharedVM()
-        val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
+    val navController: NavHostController = rememberNavController()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed,confirmStateChange={false})
+    val snackbarHostState = remember { SnackbarHostState() }
+    val sharedVM = remember { SharedVM() }
+    val platform = remember { Platform() }
+    val themeManager = remember { ThemeManager() }
 
+
+    ACTheme(darkTheme  = themeManager.isDarkTheme) {
         LaunchedEffect(Unit) {
             // 初始化日志
             Logger.apply {
@@ -107,6 +119,8 @@ fun App() {
             LocalNavController provides navController,
             LocalDrawerState provides drawerState,
             LocalSharedVM provides sharedVM,
+            LocalPlatform provides platform,
+            LocalThemeManager provides themeManager,
         ) {
             Scaffold(
                 snackbarHost = {
@@ -124,7 +138,5 @@ fun App() {
                 GlobalComponent(snackbarHostState = snackbarHostState, sharedVM = sharedVM)
             }
         }
-
     }
 }
-

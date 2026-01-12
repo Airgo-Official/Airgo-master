@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.ppoonk.ac.utils.Logger
-import io.github.ppoonk.ac.utils.TimeUtils
 import io.github.ppoonk.airgo_master.LocalNavController
 import io.github.ppoonk.airgo_master.LocalSharedVM
 import io.github.ppoonk.airgo_master.Res
@@ -25,8 +24,11 @@ import io.github.ppoonk.airgo_master.logo
 import io.github.ppoonk.airgo_master.navigation.Routes
 import io.github.ppoonk.airgo_master.navigation.toMain
 import io.github.ppoonk.airgo_master.navigation.toSignIn
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 
 @Composable
 fun SplashScreen(): Unit {
@@ -64,8 +66,8 @@ fun SplashScreen(): Unit {
         Text(
             text = stringResource(
                 Res.string.copyright,
-                TimeUtils.getCurrentDateTime().year - 2,
-                TimeUtils.getCurrentDateTime().year
+                Clock.System.now().toLocalDateTime(TimeZone.UTC).year - 2,
+                Clock.System.now().toLocalDateTime(TimeZone.UTC).year
             ),
             fontSize = 10.sp,
             modifier = Modifier

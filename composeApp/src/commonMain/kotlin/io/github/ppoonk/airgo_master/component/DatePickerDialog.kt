@@ -10,6 +10,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerDefaults.DateRangePickerHeadline
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDateRangePickerState
@@ -18,9 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.utils.TimeUtils
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @Composable
 fun DateRange(
@@ -32,7 +32,7 @@ fun DateRange(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.clickable { onClick() }
     ) {
-        ACTextField(
+        OutlinedTextField(
             modifier = Modifier.weight(6f).align(Alignment.CenterVertically),
             value = if (date.first != null) TimeUtils.toLocalDateString(
                 date.first!!
@@ -41,7 +41,7 @@ fun DateRange(
             onValueChange = {}
         )
         Spacer(Modifier.weight(1f))
-        ACTextField(
+        OutlinedTextField(
             modifier = Modifier.weight(6f).align(Alignment.CenterVertically),
             value = if (date.second != null) TimeUtils.toLocalDateString(
                 date.second!!

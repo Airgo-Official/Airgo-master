@@ -25,7 +25,8 @@ fun StoreScreen(list: List<StoreDestination> = StoreDestination.entries) {
         topBar = { StoreScreenTopBar(pageState, list) }
     ) { paddingValues ->
         HorizontalPager(
-            pageState,
+            state = pageState,
+            userScrollEnabled = false,
             modifier = Modifier.padding(paddingValues)
         ) {
             list[pageState.currentPage].content.invoke()

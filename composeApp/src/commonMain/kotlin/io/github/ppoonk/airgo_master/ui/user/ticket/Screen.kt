@@ -18,6 +18,9 @@ import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
 import io.github.ppoonk.airgo_master.LocalDrawerState
 import kotlinx.coroutines.launch
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.ticket
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TicketScreen() {
@@ -44,7 +47,7 @@ fun TicketScreenTopBar() {
     val scope = rememberCoroutineScope()
     val drawerState = LocalDrawerState.current
     ACTopAppBar(
-        title = { Text("工单") },
+        title = { Text(stringResource(Res.string.ticket)) },
         navigationIcon = { IconButton(onClick = {
             scope.launch {
                 drawerState.open()

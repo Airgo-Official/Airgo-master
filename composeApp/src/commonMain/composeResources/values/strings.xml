@@ -1,34 +1,108 @@
 <resources>
     <string name="drawer_slogan">AirGo Master</string>
     <string name="copyright" translatable="false">Copyright © %1$d - %2$d Airgo. All Rights Reserved.</string>
-    <string name="home">Home</string>
-    <string name="me">Me</string>
-
-
 
     <string name="status">Status</string>
     <string name="all">All</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
-
     <string name="time_range">Time Range</string>
-    <string name="confirm">Confirm</string>
-
     <string name="search_history">Search History</string>
     <string name="search_key">Search key</string>
 
+    <string name="sign_in">Sign In</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="sign_in">Sign In</string>
+    <string name="update_password">Update password</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_out_confirmation">Confirm sign out?</string>
 
+    <string name="success">Success!</string>
+    <string name="warning">Warning!</string>
+    <string name="data_empty">Data is empty</string>
+    <string name="email_format_tip">Email format: 123@qq.com, 6-40 characters</string>
+    <string name="password_format_tip">Password format: 123!@%_abc, 6-40 characters</string>
+    <string name="number_with_two_decimals_tip">Please enter a number (with two decimal places)</string>
+    <string name="number_tip">Please enter a number</string>
+
+    <string name="operate">Operate</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirmation">Data cannot be recovered after deletion. Confirm deletion?</string>
+    <string name="reset">Reset</string>
+    <string name="more">More</string>
+    <string name="confirm">Confirm</string>
+
+    <string name="user">User</string>
+    <string name="user_detail">User detail</string>
+    <string name="user_id">ID</string>
+    <string name="user_created_at">Created at</string>
+    <string name="user_email">Email</string>
+    <string name="user_password">Password</string>
+    <string name="user_status">Status</string>
+    <string name="user_avatar">Avatar</string>
+    <string name="user_uuid">UUID</string>
+    <string name="user_role">Role</string>
+    <string name="user_list">User List</string>
+    <string name="user_create">Create user</string>
+    <string name="user_update">Update user</string>
+    <string name="user_role_admin">Administrator</string>
+    <string name="user_role_normal">Normal user</string>
+
+    <string name="ticket">Ticket</string>
+
+    <string name="store">Store</string>
+
+    <string name="order">Order</string>
+
+    <string name="product">Product</string>
+    <string name="product_create">Create product</string>
+    <string name="product_update">Update product</string>
+    <string name="product_associated_protocol">Associated protocol</string>
+    <string name="product_id">ID</string>
+    <string name="product_created_at">Created at</string>
+    <string name="product_name">Name</string>
+    <string name="product_category">Category</string>
+    <string name="product_detail">Detail</string>
+    <string name="product_status">Status</string>
+    <string name="product_main_image">Main image</string>
+    <string name="product_monthly_price">Monthly price</string>
+    <string name="product_quarterly_price">Quarterly price</string>
+    <string name="product_semi_annual_price">Semi-annual price</string>
+    <string name="product_annual_price">Annual price</string>
+    <string name="product_category_subscribe">Subscribe</string>
+    <string name="product_category_normal">Normal</string>
+
+    <string name="coupon">Coupon</string>
+    <string name="coupon_type_threshold">Threshold</string>
+    <string name="coupon_type_discount_rate">Discount rate</string>
+    <string name="coupon_create">Create coupon</string>
+    <string name="coupon_update">Update coupon</string>
+    <string name="coupon_id">ID</string>
+    <string name="coupon_name">Name</string>
+    <string name="coupon_status">Status</string>
+    <string name="coupon_code">Code</string>
+    <string name="coupon_type">Type</string>
+    <string name="coupon_discount">Discount</string>
+    <string name="coupon_min_order_amount">Min order amount</string>
+    <string name="coupon_created_at">Created at</string>
+    <string name="coupon_associated_product">Associated products</string>
 
     <string name="node">Node</string>
-    <string name="edit_node">Edit Node</string>
-    <string name="node_details">Node Details</string>
+    <string name="node_id">ID</string>
+    <string name="node_name">Name</string>
+    <string name="node_status">Status</string>
+    <string name="node_config">Config</string>
+    <string name="node_created_at">Created at</string>
+    <string name="node_info">Node info</string>
+    <string name="node_edit">Edit node</string>
+    <string name="node_create">Create node</string>
+    <string name="node_update">Update node</string>
+    <string name="node_detail">Node Detail</string>
 
     <string name="protocol_list">Protocol List</string>
-    <string name="unknown_protocol">Unknown Protocol</string>
-    <string name="create_protocol">Create Protocol</string>
+    <string name="protocol_unknown">Unknown Protocol</string>
+    <string name="protocol_create">Create Protocol</string>
+    <string name="protocol_update">Update Protocol</string>
     <string name="protocol_name">Name</string>
     <string name="protocol_address">Address</string>
     <string name="protocol_port">Port</string>
@@ -36,22 +110,37 @@
     <string name="protocol_inbounds">Inbounds</string>
     <string name="protocol_no_template">No Template</string>
 
+    <string name="protocol_template">Protocol template</string>
+    <string name="protocol_template_id">ID</string>
+    <string name="protocol_template_name">Name</string>
+    <string name="protocol_template_created_at">Created at</string>
+    <string name="protocol_template_inbounds">Inbounds</string>
+    <string name="protocol_template_create">Created protocol template</string>
+    <string name="protocol_template_update">Update protocol template</string>
 
-    <string name="log_title">Log</string>
-    <string name="log_clear">Clear</string>
-    <string name="log_status_stopped">Stopped</string>
-    <string name="log_status_recording">Recording</string>
-
-    <string name="warning">Warning!</string>
-    <string name="delete_confirmation">Data cannot be recovered after deletion. Confirm deletion?</string>
-    <string name="data_empty">Data is empty</string>
-    <string name="email_format_tip">Email format: 123@qq.com, 6-40 characters</string>
-    <string name="password_format_tip">Password format: 123!@%_abc, 6-40 characters</string>
-    <string name="number_with_two_decimals_tip">Please enter a number (with two decimal places)</string>
-    <string name="number_tip">Please enter a number</string>
-
-    <string name="product_category_subscribe">Subscribe product</string>
-    <string name="product_category_normal">Normal product</string>
-
+    <string name="configuration">Configuration</string>
+    <string name="configuration_api_base_url">Api base url</string>
+    <string name="configuration_api_base_url_placeholder">http://xxxxxx.com:8000</string>
+    <string name="configuration_backend">Backend</string>
+    <string name="configuration_backend_token_sign">Token sign</string>
+    <string name="configuration_backend_token_duration">Token duration</string>
+    <string name="configuration_backend_admin_path">Admin path</string>
+    <string name="configuration_backend_admin_path_placeholder">/admin</string>
+    <string name="configuration_push">Push</string>
+    <string name="configuration_push_name">Name</string>
+    <string name="configuration_push_status">Status</string>
+    <string name="configuration_push_type">Type</string>
+    <string name="configuration_push_create">Create push</string>
+    <string name="configuration_push_update">Update push</string>
+    <string name="configuration_payment">Payment</string>
+    <string name="configuration_payment_create">Create payment</string>
+    <string name="configuration_payment_update">Update payment</string>
+    <string name="configuration_payment_name">Name</string>
+    <string name="configuration_payment_status">Status</string>
+    <string name="configuration_payment_type">Type</string>
+    <string name="configuration_log">Log</string>
+    <string name="configuration_log_clear">Clear</string>
+    <string name="configuration_log_status_stopped">Stopped</string>
+    <string name="configuration_log_status_recording">Recording</string>
 
 </resources>

@@ -22,7 +22,7 @@ import io.github.ppoonk.airgo_master.LocalDrawerState
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen() {
+fun ConfigurationScreen() {
     val pageState = rememberPagerState { SettingsDestination.entries.size }
     Scaffold(
         topBar = { SettingsScreenTopBar(pageState, SettingsDestination.entries) }

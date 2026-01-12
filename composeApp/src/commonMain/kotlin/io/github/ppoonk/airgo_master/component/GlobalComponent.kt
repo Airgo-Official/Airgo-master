@@ -19,8 +19,6 @@ fun GlobalComponent(
 
     Snackbar(sharedVM.snackbarVM,snackbarHostState)
 
-    BaseSearchDrawer(sharedVM.baseSearchVM)
-
 }
 
 

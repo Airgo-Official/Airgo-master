@@ -3,15 +3,18 @@ package io.github.ppoonk.airgo_master.repository.remote.model
 import androidx.compose.runtime.Composable
 import io.github.ppoonk.ac.utils.Logger
 import io.github.ppoonk.airgo_master.Res
-import io.github.ppoonk.airgo_master.unknown_protocol
-import kotlinx.datetime.Instant
+import io.github.ppoonk.airgo_master.protocol_unknown
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 @Serializable
 data class Protocol(
+    @Contextual
     val createdAt: Instant,
+    @Contextual
     val updatedAt: Instant?,
     val id: UInt,
     val name: String,
@@ -36,7 +39,7 @@ data class Protocol(
         } catch (e: Throwable) {
             // TODO (JSON) getProtocolType, Failed to parse inbounds: Encountered an unknown key 'tls' at offset 2 at path: $
             Logger.error(Logger.JSON) { "getProtocolType, Failed to parse inbounds: ${e.message}" }
-            stringResource(Res.string.unknown_protocol)
+            stringResource(Res.string.protocol_unknown)
         }
     }
 }
@@ -97,7 +100,9 @@ data class SearchProtocol(
 @Serializable
 data class FilterProtocol(
     val status: Int? = null,
+    @Contextual
     var createdAtStart: Instant? = null,
+    @Contextual
     var createdAtEnd: Instant? = null,
 )
 

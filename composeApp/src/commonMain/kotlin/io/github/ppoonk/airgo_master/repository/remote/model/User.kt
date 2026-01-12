@@ -1,12 +1,31 @@
 package io.github.ppoonk.airgo_master.repository.remote.model
 
-import kotlinx.datetime.Instant
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.operate
+import io.github.ppoonk.airgo_master.user_avatar
+import io.github.ppoonk.airgo_master.user_created_at
+import io.github.ppoonk.airgo_master.user_email
+import io.github.ppoonk.airgo_master.user_id
+import io.github.ppoonk.airgo_master.user_role
+import io.github.ppoonk.airgo_master.user_role_admin
+import io.github.ppoonk.airgo_master.user_role_normal
+import io.github.ppoonk.airgo_master.user_status
+import io.github.ppoonk.airgo_master.user_uuid
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 
 @Serializable
 data class User(
+    @Contextual
     val createdAt: Instant,
+    @Contextual
     val updatedAt: Instant?,
 
     val id: UInt,
@@ -16,6 +35,7 @@ data class User(
     val uuid: String,
     val role: String,
 )
+
 
 @Serializable
 data class SignInReq(
@@ -86,12 +106,47 @@ data class SearchUser(
 @Serializable
 data class FilterUser(
     val status: Int? = null,
+    @Contextual
     val createdAtStart: Instant? = null,
+    @Contextual
     val createdAtEnd: Instant? = null,
 )
 
 
 enum class RoleConst {
     ADMIN,
-    NORMAL
+    NORMAL;
+
+    @Composable
+    fun i18n(): String {
+        return when (this) {
+            ADMIN -> stringResource(Res.string.user_role_admin)
+            NORMAL -> stringResource(Res.string.user_role_normal)
+        }
+    }
+
+}
+
+
+enum class UserTableColumn(
+    val text: StringResource,
+    val width: Dp
+) {
+    ID(Res.string.user_id, 100.dp),
+    EMAIL(Res.string.user_email, 200.dp),
+    STATUS(Res.string.user_status, 100.dp),
+    ROLE(Res.string.user_role, 100.dp),
+    UUID(Res.string.user_uuid, 400.dp),
+    CREATED_AT(Res.string.user_created_at, 150.dp),
+    AVATAR(Res.string.user_avatar, 300.dp),
+
+    OPERATE(Res.string.operate, 150.dp);
+
+
+    companion object {
+        fun totalWidth(): Int {
+            return UserTableColumn.entries.sumOf { it.width.value.toInt() }
+        }
+    }
+
 }

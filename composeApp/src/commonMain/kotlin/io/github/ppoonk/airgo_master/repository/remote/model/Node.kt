@@ -1,14 +1,28 @@
 package io.github.ppoonk.airgo_master.repository.remote.model
 
-import kotlinx.datetime.Instant
+
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.node_config
+import io.github.ppoonk.airgo_master.node_created_at
+import io.github.ppoonk.airgo_master.node_id
+import io.github.ppoonk.airgo_master.node_name
+import io.github.ppoonk.airgo_master.node_status
+import io.github.ppoonk.airgo_master.operate
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
+import kotlin.time.Instant
 
 /**
  * 节点
  */
 @Serializable
 data class Node(
+    @Contextual
     val createdAt: Instant,
+    @Contextual
     val updatedAt: Instant?,
     val id: UInt,
     val name: String,
@@ -72,7 +86,9 @@ data class SearchNode(
 @Serializable
 data class FilterNode(
     val status: Int? = null,
+    @Contextual
     var createdAtStart: Instant? = null,
+    @Contextual
     var createdAtEnd: Instant? = null,
 )
 
@@ -134,3 +150,29 @@ object NodeConst {
   ]"""
 
 }
+
+enum class NodeTableColumn(
+    val text: StringResource,
+    val width: Dp
+) {
+    ID(Res.string.node_id, 100.dp),
+
+    NAME(Res.string.node_name, 300.dp),
+
+    STATUS(Res.string.node_status, 100.dp),
+
+//    CONFIG(Res.string.node_config, 50.dp),
+
+    CREATED_AT(Res.string.node_created_at, 150.dp),
+
+    OPERATE(Res.string.operate, 150.dp);
+
+
+    companion object {
+        fun totalWidth(): Int {
+            return NodeTableColumn.entries.sumOf { it.width.value.toInt() }
+        }
+    }
+
+}
+

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
@@ -18,6 +19,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import io.github.ppoonk.ac.ui.component.ACButtonError
 import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
@@ -41,13 +42,24 @@ import io.github.ppoonk.airgo_master.repository.remote.model.PaymentType
 import io.github.ppoonk.airgo_master.repository.remote.model.Status
 import io.github.ppoonk.airgo_master.repository.remote.model.TronToken
 import kotlinx.coroutines.launch
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.configuration_payment_create
+import io.github.ppoonk.airgo_master.configuration_payment_name
+import io.github.ppoonk.airgo_master.configuration_payment_status
+import io.github.ppoonk.airgo_master.configuration_payment_type
+import io.github.ppoonk.airgo_master.configuration_payment_update
+import io.github.ppoonk.airgo_master.confirm
+import io.github.ppoonk.airgo_master.delete_confirmation
+import io.github.ppoonk.airgo_master.node_id
+import io.github.ppoonk.airgo_master.warning
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPaymentScreen() {
     val sharedVM = LocalSharedVM.current
     val vm = sharedVM.configurationVM
-    val widget by sharedVM.configurationVM.paymentWidget.collectAsState()
+    val widget by sharedVM.configurationVM.editPaymentWidget.collectAsState()
     val scope = rememberCoroutineScope()
     val navController = LocalNavController.current
 
@@ -56,10 +68,12 @@ fun EditPaymentScreen() {
             ACTopAppBar(
                 title = {
                     Text(
-                        when (widget.editType) {
-                            EditType.CREATE -> "新建支付"
-                            EditType.UPDATE -> "编辑支付"
-                        }
+                        stringResource(
+                            when (widget.editType) {
+                                EditType.CREATE -> Res.string.configuration_payment_create
+                                EditType.UPDATE -> Res.string.configuration_payment_update
+                            }
+                        )
                     )
                 },
                 navigationIcon = {
@@ -77,7 +91,7 @@ fun EditPaymentScreen() {
                             // 新建
                             IconButton(onClick = {
                                 scope.launch {
-                                    Repository.remote.updatePaymentList(vm.updatePaymentReq())
+                                    Repository.remote.updatePaymentList(vm.toUpdatePaymentReq())
                                         .onFailure {
                                             sharedVM.dialogVM.openDialog(
                                                 title = { Text(it.code.toString()) },
@@ -95,7 +109,7 @@ fun EditPaymentScreen() {
                             // 更新
                             IconButton(onClick = {
                                 scope.launch {
-                                    Repository.remote.updatePaymentList(vm.updatePaymentReq())
+                                    Repository.remote.updatePaymentList(vm.toUpdatePaymentReq())
                                         .onFailure {
                                             sharedVM.dialogVM.openDialog(
                                                 title = { Text(it.code.toString()) },
@@ -110,13 +124,13 @@ fun EditPaymentScreen() {
                             // 删除
                             IconButton(onClick = {
                                 sharedVM.dialogVM.openDialog(
-                                    title = { Text("提示") },
-                                    text = { Text("删除后数据无法恢复，确认删除吗?") }
+                                    title = { Text(stringResource(Res.string.warning)) },
+                                    text = { Text(stringResource(Res.string.delete_confirmation)) }
                                 ) {
                                     ACButtonError(
                                         onClick = {
                                             scope.launch {
-                                                Repository.remote.updatePaymentList(vm.deletePaymentReq())
+                                                Repository.remote.updatePaymentList(vm.toDeletePaymentReq())
                                                     .onFailure {
                                                         sharedVM.dialogVM.openDialog(
                                                             title = { Text(it.code.toString()) },
@@ -130,7 +144,7 @@ fun EditPaymentScreen() {
                                             }
                                         },
                                     ) {
-                                        Text("确认")
+                                        Text(stringResource(Res.string.confirm))
                                     }
                                 }
                             }) { ACIconSmall(ACIconDefault.Trash, null) }
@@ -141,15 +155,17 @@ fun EditPaymentScreen() {
         }
     ) { paddingValues ->
 
-        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp)) {
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp).widthIn(max = 600.dp)
+        ) {
             item {
-                Text("名称")
-                ACTextField(
+                Text(stringResource(Res.string.configuration_payment_name))
+                TextField(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     value = widget.name,
                     isError = widget.nameError.isNotEmpty(),
                     supportingText = { Text(widget.nameError) },
-                    onValueChange = { vm.refreshPaymentName(it) },
+                    onValueChange = { vm.paymentName(it) },
                 )
             }
             item {
@@ -158,10 +174,10 @@ fun EditPaymentScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
                 ) {
-                    Text("状态")
+                    Text(stringResource(Res.string.configuration_payment_status))
                     Switch(
                         checked = widget.status == Status.ENABLE,
-                        onCheckedChange = { vm.refreshPaymentStatus(it) }
+                        onCheckedChange = { vm.paymentStatus(it) }
                     )
                 }
             }
@@ -171,12 +187,12 @@ fun EditPaymentScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
                 ) {
-                    Text("类型")
+                    Text(stringResource(Res.string.configuration_payment_type))
                     ExposedDropdownMenuBox(
                         expanded = widget.paymentTypeExpanded,
-                        onExpandedChange = { vm.refreshPaymentTypeExpanded() },
+                        onExpandedChange = { vm.paymentTypeExpanded() },
                     ) {
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             value = widget.paymentType.name,
                             leadingIcon = {
@@ -192,12 +208,12 @@ fun EditPaymentScreen() {
                         )
                         ExposedDropdownMenu(
                             expanded = widget.paymentTypeExpanded,
-                            onDismissRequest = { vm.refreshPaymentTypeExpanded() },
+                            onDismissRequest = { vm.paymentTypeExpanded() },
                         ) {
                             PaymentType.entries.forEach { p ->
                                 DropdownMenuItem(
                                     text = { Text(p.name) },
-                                    onClick = { vm.refreshPaymentType(p) }
+                                    onClick = { vm.paymentType(p) }
                                 )
                             }
                         }
@@ -207,30 +223,30 @@ fun EditPaymentScreen() {
             item {
                 when (widget.paymentType) {
                     PaymentType.ALIPAY -> {
-                        Text("appId")
-                        ACTextField(
+                        Text("app id")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.alipayConfig.appId,
-                            onValueChange = { vm.refreshAlipayConfig(widget.alipayConfig.copy(appId = it)) }
+                            onValueChange = { vm.alipayConfig(widget.alipayConfig.copy(appId = it)) }
                         )
-                        Text("appPrivateKey")
-                        ACTextField(
+                        Text("app privateKey")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.alipayConfig.appPrivateKey,
                             onValueChange = {
-                                vm.refreshAlipayConfig(
+                                vm.alipayConfig(
                                     widget.alipayConfig.copy(
                                         appPrivateKey = it
                                     )
                                 )
                             }
                         )
-                        Text("alipayPublicCert")
-                        ACTextField(
+                        Text("alipay public cert")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.alipayConfig.alipayPublicCert,
                             onValueChange = {
-                                vm.refreshAlipayConfig(
+                                vm.alipayConfig(
                                     widget.alipayConfig.copy(
                                         alipayPublicCert = it
                                     )
@@ -241,72 +257,72 @@ fun EditPaymentScreen() {
 
                     PaymentType.EPAY -> {
                         Text("url")
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.epayConfig.url,
-                            onValueChange = { vm.refreshEpayConfig(widget.epayConfig.copy(url = it)) }
+                            onValueChange = { vm.epayConfig(widget.epayConfig.copy(url = it)) }
                         )
                         Text("key")
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.epayConfig.key,
-                            onValueChange = { vm.refreshEpayConfig(widget.epayConfig.copy(key = it)) }
+                            onValueChange = { vm.epayConfig(widget.epayConfig.copy(key = it)) }
                         )
                         Text("pid")
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.epayConfig.pid,
-                            onValueChange = { vm.refreshEpayConfig(widget.epayConfig.copy(pid = it)) }
+                            onValueChange = { vm.epayConfig(widget.epayConfig.copy(pid = it)) }
                         )
                     }
 
                     PaymentType.STRIPE -> {
                         Text("key")
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.stripeConfig.key,
-                            onValueChange = { vm.refreshStripeConfig(widget.stripeConfig.copy(key = it)) }
+                            onValueChange = { vm.stripeConfig(widget.stripeConfig.copy(key = it)) }
                         )
-                        Text("endpointSecret")
-                        ACTextField(
+                        Text("endpoint secret")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.stripeConfig.endpointSecret,
                             onValueChange = {
-                                vm.refreshStripeConfig(
+                                vm.stripeConfig(
                                     widget.stripeConfig.copy(
                                         endpointSecret = it
                                     )
                                 )
                             }
                         )
-                        Text("successURL")
-                        ACTextField(
+                        Text("success URL")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.stripeConfig.successURL,
-                            onValueChange = { vm.refreshStripeConfig(widget.stripeConfig.copy(successURL = it)) }
+                            onValueChange = { vm.stripeConfig(widget.stripeConfig.copy(successURL = it)) }
                         )
-                        Text("cancelURL")
-                        ACTextField(
+                        Text("cancel URL")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.stripeConfig.cancelURL,
-                            onValueChange = { vm.refreshStripeConfig(widget.stripeConfig.copy(cancelURL = it)) }
+                            onValueChange = { vm.stripeConfig(widget.stripeConfig.copy(cancelURL = it)) }
                         )
                     }
 
                     PaymentType.TRON -> {
-                        Text("apiKey")
-                        ACTextField(
+                        Text("api key") // TODO 添加提示
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.tronConfig.apiKey,
-                            onValueChange = { vm.refreshTronConfig(widget.tronConfig.copy(apiKey = it)) }
+                            onValueChange = { vm.tronConfig(widget.tronConfig.copy(apiKey = it)) }
                         )
                         Text("address")
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.tronConfig.address,
-                            onValueChange = { vm.refreshTronConfig(widget.tronConfig.copy(address = it)) }
+                            onValueChange = { vm.tronConfig(widget.tronConfig.copy(address = it)) }
                         )
-                        Text("acceptTokens")
+                        Text("accept tokens")
                         FlowRow(
                             modifier = Modifier.padding(top = 8.dp, bottom = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -319,7 +335,7 @@ fun EditPaymentScreen() {
                                     Checkbox(
                                         checked = widget.tronConfig.acceptTokens.contains(t.name),
                                         onCheckedChange = { checked ->
-                                            vm.refreshTronToken(t, checked)
+                                            vm.tronToken(t, checked)
                                         }
                                     )
                                     Text(t.name)

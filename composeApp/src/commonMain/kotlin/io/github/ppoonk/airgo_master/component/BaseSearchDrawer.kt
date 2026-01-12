@@ -17,6 +17,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,7 +35,6 @@ import io.github.ppoonk.ac.ui.component.ACIconSmall
 import io.github.ppoonk.ac.ui.component.ACLabelInfo
 import io.github.ppoonk.ac.ui.component.ACModalBottomSheet
 import io.github.ppoonk.ac.ui.component.ACSingleChoiceRow
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.SegmentedButtonItem
 import io.github.ppoonk.ac.utils.TimeUtils
 import io.github.ppoonk.ac.utils.onlyNumber
@@ -47,7 +47,7 @@ import io.github.ppoonk.airgo_master.status
 import io.github.ppoonk.airgo_master.time_range
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.stringResource
 
@@ -107,7 +107,7 @@ fun BaseSearchDrawer(
             // 搜索
             item {
                 Text(stringResource(Res.string.search_key))
-                ACTextField(
+                OutlinedTextField(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     value = widget.search,
                     onValueChange = { vm.refreshSearch(it) },

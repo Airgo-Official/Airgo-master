@@ -7,7 +7,6 @@ import io.github.ppoonk.airgo_master.component.SnackbarVM
 
 
 class SharedVM(
-    val baseSearchVM: BaseSearchVM = BaseSearchVM(),
     val dialogVM: DialogVM = DialogVM(),
     val loadingDialogVM: LoadingDialogVM = LoadingDialogVM(),
     val snackbarVM: SnackbarVM = SnackbarVM(),

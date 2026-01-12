@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,6 +15,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import io.github.ppoonk.ac.ui.component.ACButtonError
 import io.github.ppoonk.ac.ui.component.ACIconDefault
 import io.github.ppoonk.ac.ui.component.ACIconSmall
-import io.github.ppoonk.ac.ui.component.ACTextField
 import io.github.ppoonk.ac.ui.component.ACTopAppBar
 import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
@@ -36,13 +37,23 @@ import io.github.ppoonk.airgo_master.repository.remote.model.PushType
 import io.github.ppoonk.airgo_master.repository.remote.model.Status
 import io.github.ppoonk.airgo_master.sharedViewModel.ConfigurationVM
 import kotlinx.coroutines.launch
+import io.github.ppoonk.airgo_master.Res
+import io.github.ppoonk.airgo_master.configuration_push_create
+import io.github.ppoonk.airgo_master.configuration_push_name
+import io.github.ppoonk.airgo_master.configuration_push_status
+import io.github.ppoonk.airgo_master.configuration_push_type
+import io.github.ppoonk.airgo_master.configuration_push_update
+import io.github.ppoonk.airgo_master.confirm
+import io.github.ppoonk.airgo_master.delete_confirmation
+import io.github.ppoonk.airgo_master.warning
+import org.jetbrains.compose.resources.stringResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPushScreen() {
     val sharedVM = LocalSharedVM.current
-    val widget by sharedVM.configurationVM.pushWidget.collectAsState()
+    val widget by sharedVM.configurationVM.editPushWidget.collectAsState()
     val vm = sharedVM.configurationVM
 
     Scaffold(
@@ -50,11 +61,11 @@ fun EditPushScreen() {
     ) { paddingValues ->
 
         LazyColumn(
-            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp)
+            modifier = Modifier.padding(paddingValues).imePadding().padding(horizontal = 16.dp).widthIn(max = 600.dp)
         ) {
             item {
-                Text("名称")
-                ACTextField(
+                Text(stringResource(Res.string.configuration_push_name))
+                TextField(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                     value = widget.name,
                     isError = widget.nameError.isNotEmpty(),
@@ -68,10 +79,10 @@ fun EditPushScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
                 ) {
-                    Text("状态")
+                    Text(stringResource(Res.string.configuration_push_status))
                     Switch(
                         checked = widget.status == Status.ENABLE,
-                        onCheckedChange = { vm.refreshPushStatus(it) }
+                        onCheckedChange = { vm.pushStatus(it) }
                     )
                 }
             }
@@ -81,12 +92,12 @@ fun EditPushScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp)
                 ) {
-                    Text("类型")
+                    Text(stringResource(Res.string.configuration_push_type))
                     ExposedDropdownMenuBox(
-                        expanded = widget.pushTypeExpanded,
-                        onExpandedChange = { vm.refreshPushTypeExpanded() },
+                        expanded = widget.expandPushType,
+                        onExpandedChange = { vm.expandPushType() },
                     ) {
-                        ACTextField(
+                        TextField(
                             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             value = widget.pushType.name,
                             onValueChange = {},
@@ -94,13 +105,13 @@ fun EditPushScreen() {
                             enabled = false,
                         )
                         ExposedDropdownMenu(
-                            expanded = widget.pushTypeExpanded,
+                            expanded = widget.expandPushType,
                             onDismissRequest = { },
                         ) {
                             PushType.entries.forEach { p ->
                                 DropdownMenuItem(
                                     text = { Text(p.name) },
-                                    onClick = { vm.refreshPushType(p) }
+                                    onClick = { vm.pushType(p) }
                                 )
                             }
                         }
@@ -110,38 +121,38 @@ fun EditPushScreen() {
             item {
                 when (widget.pushType) {
                     PushType.TG_BOT -> {
-                        Text("botToken")
-                        ACTextField(
+                        Text("Bot Token")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.tgBotConfig.botToken,
-                            onValueChange = { vm.refreshTgBotConfig(widget.tgBotConfig.copy(botToken = it)) }
+                            onValueChange = { vm.tgBotConfig(widget.tgBotConfig.copy(botToken = it)) }
                         )
-                        Text("proxyURL")
-                        ACTextField(
+                        Text("Proxy URL")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                             value = widget.tgBotConfig.proxyURL,
-                            onValueChange = { vm.refreshTgBotConfig(widget.tgBotConfig.copy(proxyURL = it)) }
+                            onValueChange = { vm.tgBotConfig(widget.tgBotConfig.copy(proxyURL = it)) }
                         )
                     }
 
                     PushType.EMAIL -> {
-                        Text("host")
-                        ACTextField(
+                        Text("Host")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.emailConfig.host,
-                            onValueChange = { vm.refreshEmailConfig(widget.emailConfig.copy(host = it)) }
+                            onValueChange = { vm.emailConfig(widget.emailConfig.copy(host = it)) }
                         )
-                        Text("username")
-                        ACTextField(
+                        Text("Username")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                             value = widget.emailConfig.username,
-                            onValueChange = { vm.refreshEmailConfig(widget.emailConfig.copy(username = it)) }
+                            onValueChange = { vm.emailConfig(widget.emailConfig.copy(username = it)) }
                         )
-                        Text("password")
-                        ACTextField(
+                        Text("Password")
+                        TextField(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                             value = widget.emailConfig.password,
-                            onValueChange = { vm.refreshEmailConfig(widget.emailConfig.copy(password = it)) }
+                            onValueChange = { vm.emailConfig(widget.emailConfig.copy(password = it)) }
                         )
                     }
                 }
@@ -169,8 +180,8 @@ private fun EditPushTopBar(
         title = {
             Text(
                 when (editType) {
-                    EditType.CREATE -> "新建消息推送"
-                    EditType.UPDATE -> "编辑消息推送"
+                    EditType.CREATE -> stringResource(Res.string.configuration_push_create)
+                    EditType.UPDATE -> stringResource(Res.string.configuration_push_update)
                 }
             )
         },
@@ -189,7 +200,7 @@ private fun EditPushTopBar(
                     // 新建
                     IconButton(onClick = {
                         scope.launch {
-                            Repository.remote.updatePushList(vm.updatePushReq())
+                            Repository.remote.updatePushList(vm.toUpdatePushReq())
                                 .onFailure {
                                     sharedVM.dialogVM.openDialog(
                                         title = { Text(it.code.toString()) },
@@ -207,7 +218,7 @@ private fun EditPushTopBar(
                     // 更新
                     IconButton(onClick = {
                         scope.launch {
-                            Repository.remote.updatePushList(vm.updatePushReq())
+                            Repository.remote.updatePushList(vm.toUpdatePushReq())
                                 .onFailure {
                                     sharedVM.dialogVM.openDialog(
                                         title = { Text(it.code.toString()) },
@@ -222,13 +233,13 @@ private fun EditPushTopBar(
                     // 删除
                     IconButton(onClick = {
                         sharedVM.dialogVM.openDialog(
-                            title = { Text("提示") },
-                            text = { Text("删除后数据无法恢复，确认删除吗?") }
+                            title = { Text(stringResource(Res.string.warning)) },
+                            text = { Text(stringResource(Res.string.delete_confirmation)) }
                         ) {
                             ACButtonError(
                                 onClick = {
                                     scope.launch {
-                                        Repository.remote.updatePushList(vm.deletePushReq())
+                                        Repository.remote.updatePushList(vm.toDeletePushReq())
                                             .onFailure {
                                                 sharedVM.dialogVM.openDialog(
                                                     title = { Text(it.code.toString()) },
@@ -242,7 +253,7 @@ private fun EditPushTopBar(
                                     }
                                 },
                             ) {
-                                Text("确认")
+                                Text(stringResource(Res.string.confirm))
                             }
                         }
                     }) { ACIconSmall(ACIconDefault.Trash, null) }

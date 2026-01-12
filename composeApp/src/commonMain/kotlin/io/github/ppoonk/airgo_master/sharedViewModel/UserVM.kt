@@ -9,14 +9,13 @@ import io.github.ppoonk.ac.utils.Result
 import io.github.ppoonk.ac.utils.StringUtils
 import io.github.ppoonk.ac.utils.ValidationResult
 import io.github.ppoonk.ac.utils.ValidationUtils
-import io.github.ppoonk.ac.utils.onFailure
 import io.github.ppoonk.ac.utils.onSuccess
+import io.github.ppoonk.airgo_master.component.BaseSearchVM
 import io.github.ppoonk.airgo_master.component.BaseSearchWidget
 import io.github.ppoonk.airgo_master.component.EditType
 import io.github.ppoonk.airgo_master.component.SearchType
 import io.github.ppoonk.airgo_master.navigation.Routes
 import io.github.ppoonk.airgo_master.repository.Repository
-import io.github.ppoonk.airgo_master.repository.remote.model.BusinessCode
 import io.github.ppoonk.airgo_master.repository.remote.model.CreateUserReq
 import io.github.ppoonk.airgo_master.repository.remote.model.FilterUser
 import io.github.ppoonk.airgo_master.repository.remote.model.GetUserListReq
@@ -36,9 +35,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 
-class UserVM() : ViewModel() {
+class UserVM(val baseSearchVM: BaseSearchVM = BaseSearchVM()) : ViewModel() {
+
     // 当前选择的用户
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
@@ -129,7 +128,6 @@ class UserVM() : ViewModel() {
                 }
                 req = req.copy(search = r1)
             }
-
             // filter 参数
             val r2 = FilterUser(
                 status = if (status == Status.ALL) null else status.ordinal,
@@ -160,7 +158,6 @@ class UserVM() : ViewModel() {
         }.flow.cachedIn(viewModelScope).flowOn(Dispatchers.IO)
     }
 
-
     private val _editUserWidget = MutableStateFlow(EditUserWidget())
     val editUserWidget: StateFlow<EditUserWidget> = _editUserWidget
     fun initEditUser(editType: EditType, current: User? = null): Unit {
@@ -170,7 +167,7 @@ class UserVM() : ViewModel() {
             }
 
             EditType.UPDATE -> {
-                _currentUser.value?.let {
+                current?.let {
                     _editUserWidget.value = EditUserWidget(
                         id = it.id,
                         email = it.email,
@@ -197,7 +194,7 @@ class UserVM() : ViewModel() {
 
     }
 
-    fun refreshEmail(v: String): Unit {
+    fun editUserWidgetEmail(v: String): Unit {
         val err = when (val r = ValidationUtils.validateEmail(v)) {
             is ValidationResult.Failure -> if (v.isEmpty()) "" else r.error
             is ValidationResult.Success -> ""
@@ -205,7 +202,7 @@ class UserVM() : ViewModel() {
         _editUserWidget.value = _editUserWidget.value.copy(email = v, emailError = err)
     }
 
-    fun refreshPassword(v: String): Unit {
+    fun editUserWidgetPassword(v: String): Unit {
         val err = when (val r = ValidationUtils.validatePassword(v)) {
             is ValidationResult.Failure -> if (v.isEmpty()) "" else r.error
             is ValidationResult.Success -> ""
@@ -214,28 +211,28 @@ class UserVM() : ViewModel() {
             _editUserWidget.value.copy(password = v, passwordError = err)
     }
 
-    fun refreshStatus(v: Boolean): Unit {
+    fun editUserWidgetStatus(v: Boolean): Unit {
         _editUserWidget.value =
             _editUserWidget.value.copy(status = if (v) Status.ENABLE else Status.DISABLE)
     }
 
-    fun refreshRole(v: RoleConst): Unit {
+    fun editUserWidgetRole(v: RoleConst): Unit {
         _editUserWidget.value = _editUserWidget.value.copy(
             role = v,
-            roleExpanded = !_editUserWidget.value.roleExpanded
+            expandRole = !_editUserWidget.value.expandRole
         )
     }
 
-    fun refreshRoleExpanded(): Unit {
+    fun editUserWidgetExpandRole(): Unit {
         _editUserWidget.value =
-            _editUserWidget.value.copy(roleExpanded = !_editUserWidget.value.roleExpanded)
+            _editUserWidget.value.copy(expandRole = !_editUserWidget.value.expandRole)
     }
 
-    fun refreshAvatar(v: String): Unit {
+    fun editUserWidgetAvatar(v: String): Unit {
         _editUserWidget.value = _editUserWidget.value.copy(avatar = v)
     }
 
-    fun refreshUUID(v: String): Unit {
+    fun editUserWidgetUUID(v: String): Unit {
         _editUserWidget.value = _editUserWidget.value.copy(uuid = v)
     }
 
@@ -253,7 +250,7 @@ data class EditUserWidget(
 
     val emailError: String = "",
     val passwordError: String = "",
-    val roleExpanded: Boolean = false,
+    val expandRole: Boolean = false,
 
     val oldUpdateUserReq: UpdateUserReq = UpdateUserReq(),
 

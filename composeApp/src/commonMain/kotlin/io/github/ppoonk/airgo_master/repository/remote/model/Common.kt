@@ -56,4 +56,17 @@ enum class Status {
             ALL -> stringResource(Res.string.all)
         }
     }
+    companion object{
+        @Composable
+        fun i18nByOrdinal(ordinal: Int): String {
+            return when (ordinal) {
+                DISABLE.ordinal -> stringResource(Res.string.disable)
+                ENABLE.ordinal -> stringResource(Res.string.enable)
+                ALL.ordinal -> stringResource(Res.string.all)
+                else -> ""
+            }
+        }
+    }
+
+
 }

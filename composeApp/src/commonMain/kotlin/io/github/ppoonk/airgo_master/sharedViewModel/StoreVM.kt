@@ -8,7 +8,6 @@ import io.github.ppoonk.ac.utils.ValidationResult
 import io.github.ppoonk.ac.utils.ValidationUtils
 import io.github.ppoonk.airgo_master.component.BaseSearchWidget
 import io.github.ppoonk.airgo_master.component.EditType
-import io.github.ppoonk.airgo_master.component.SearchHistory
 import io.github.ppoonk.airgo_master.component.SearchType
 import io.github.ppoonk.airgo_master.repository.Repository
 import io.github.ppoonk.airgo_master.repository.remote.model.Coupon
@@ -44,44 +43,8 @@ class StoreVM() : ViewModel() {
     }
 
 
-    private val _historyList = MutableStateFlow<List<SearchHistory>>(emptyList())
-    val historyList: StateFlow<List<SearchHistory>> = _historyList
-    fun getSearchHistory(): Unit {
-        _historyList.value = Repository.local.getProductSearchHistory()
-    }
-
-    fun setSearchHistory(v: SearchHistory?): Unit {
-        Repository.local.setProductSearchHistory(v)
-        getSearchHistory()
-    }
-
-
     private val _getProductListReq = MutableStateFlow(GetProductListReq())
     fun refreshGetProductListReq(v: BaseSearchWidget): Unit {
-        with(v) {
-            var req = GetProductListReq()
-
-            // search 参数
-            search.isNotEmpty().let {
-                val r1 = when (searchType) {
-                    SearchType.ID -> SearchProduct(id = search.toUIntOrNull())
-                    SearchType.NAME -> SearchProduct(name = search)
-                }
-                req = req.copy(search = r1)
-            }
-
-            // filter 参数
-            val r2 = FilterProduct(
-                status = if (status == Status.ALL) null else status.ordinal,
-                createdAtStart = datePickerStart,
-                createdAtEnd = datePickerEnd
-            )
-            req = req.copy(filter = r2)
-            _getProductListReq.value = req
-        }
-    }
-
-    fun refreshGetProductListReq2(v: BaseSearchWidget): Unit {
         with(v) {
             var req = GetProductListReq()
 
@@ -142,17 +105,17 @@ class StoreVM() : ViewModel() {
     }
 
 
-    private val _couponWidget = MutableStateFlow(EditCouponWidget())
-    val editCouponWidget: StateFlow<EditCouponWidget> = _couponWidget
+    private val _editCouponWidget = MutableStateFlow(EditCouponWidget())
+    val editCouponWidget: StateFlow<EditCouponWidget> = _editCouponWidget
 
     fun initEditCoupon(editType: EditType, current: Coupon? = null): Unit {
         when (editType) {
-            EditType.CREATE -> _couponWidget.value = EditCouponWidget()
+            EditType.CREATE -> _editCouponWidget.value = EditCouponWidget()
 
             EditType.UPDATE -> {
                 current?.let {
                     _currentCoupon.value = it
-                    _couponWidget.value = EditCouponWidget(
+                    _editCouponWidget.value = EditCouponWidget(
                         id = it.id,
                         name = it.name,
                         status = Status.entries[it.status],
@@ -180,14 +143,14 @@ class StoreVM() : ViewModel() {
 
     }
 
-    fun expandCouponType(v: Boolean): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetExpandCouponType(v: Boolean): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             expandCouponType = v,
         )
     }
 
-    fun couponType(v: CouponType): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetCouponType(v: CouponType): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             couponType = v,
             discount = "",
             discountError = "",
@@ -195,27 +158,27 @@ class StoreVM() : ViewModel() {
         )
     }
 
-    fun couponName(v: String): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetName(v: String): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             name = v,
         )
     }
 
-    fun couponStatus(v: Boolean): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetStatus(v: Boolean): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             status = if (v) Status.ENABLE else Status.DISABLE,
         )
     }
 
-    fun couponCode(v: String): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetCouponCode(v: String): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             couponCode = v,
         )
     }
 
-    fun couponDiscount(v: String): Unit {
-        val res = when (_couponWidget.value.couponType) {
-            CouponType.DISCOUNT_RATE -> {
+    fun editCouponWidgetDiscount(v: String): Unit {
+        val res = when (_editCouponWidget.value.couponType) {
+            CouponType.DISCOUNT_RATE -> { // 按比例折扣
                 ValidationUtils.validateDecimalPlaces2(
                     input = v,
                     range = 0.0..1.0
@@ -234,54 +197,54 @@ class StoreVM() : ViewModel() {
         }
 
 
-        _couponWidget.value = _couponWidget.value.copy(
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             discount = v,
             discountError = err
         )
     }
 
-    fun couponMinOrderAmount(v: String): Unit {
+    fun editCouponWidgetMinOrderAmount(v: String): Unit {
         val err = when (val res = ValidationUtils.validateDecimalPlaces2(v)) {
             is ValidationResult.Failure -> res.error
 
             is ValidationResult.Success -> ""
         }
-        _couponWidget.value = _couponWidget.value.copy(
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             minOrderAmount = v,
             minOrderAmountError = err
         )
     }
 
-    fun couponExpandSelectProduct(v: Boolean): Unit {
-        _couponWidget.value = _couponWidget.value.copy(
+    fun editCouponWidgetExpandSelectProduct(v: Boolean): Unit {
+        _editCouponWidget.value = _editCouponWidget.value.copy(
             expandSelectProduct = v,
         )
     }
 
-    fun couponCheckedProductId(v: UInt, checked: Boolean) {
-        val l = _couponWidget.value.productIdList.toMutableList().apply {
+    fun editCouponWidgetCheckedProduct(v: UInt, checked: Boolean) {
+        val l = _editCouponWidget.value.productIdList.toMutableList().apply {
             if (checked) add(v) else remove(v)
         }
-        _couponWidget.value = _couponWidget.value.copy(productIdList = l)
+        _editCouponWidget.value = _editCouponWidget.value.copy(productIdList = l)
     }
 
-    fun couponClearCheckedProductId() {
-        _couponWidget.value = _couponWidget.value.copy(productIdList = emptyList())
+    fun editCouponWidgetClearCheckedProduct() {
+        _editCouponWidget.value = _editCouponWidget.value.copy(productIdList = emptyList())
     }
 
 
-    private val _productWidget = MutableStateFlow(EditProductWidget())
-    val productWidget: StateFlow<EditProductWidget> = _productWidget
+    private val _editProductWidget = MutableStateFlow(EditProductWidget())
+    val editProductWidget: StateFlow<EditProductWidget> = _editProductWidget
 
     fun initEditProduct(editType: EditType, current: Product? = null): Unit {
         when (editType) {
             EditType.CREATE -> {
-                _productWidget.value = EditProductWidget()
+                _editProductWidget.value = EditProductWidget()
             }
 
             EditType.UPDATE -> {
                 current?.let { v ->
-                    _productWidget.value = EditProductWidget(
+                    _editProductWidget.value = EditProductWidget(
                         id = v.id,
                         name = v.name,
                         category = ProductCategory.valueOf(v.category),
@@ -310,132 +273,122 @@ class StoreVM() : ViewModel() {
             }
         }
 
-
-//        protocolIdList?.let { l ->
-//            _productWidget.value = _productWidget.value.copy(
-//                protocolIdList = l,
-//                oldUpdateProductReq = _productWidget.value.oldUpdateProductReq.copy(
-//                    protocolIdList = l
-//                )
-//            )
-//        }
-
     }
 
-    fun expandProductCategory(v: Boolean): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetExpandProductCategory(v: Boolean): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             expandProductCategory = v
         )
     }
 
-    fun productCategory(v: ProductCategory): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetCategory(v: ProductCategory): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             category = v,
             expandProductCategory = false
         )
     }
 
-    fun productName(v: String): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetName(v: String): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             name = v
         )
     }
 
-    fun productStatus(v: Boolean): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetStatus(v: Boolean): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             status = if (v) Status.ENABLE else Status.DISABLE
         )
     }
 
-    fun expandSelectNode(v: Boolean): Unit {
-        _productWidget.value = _productWidget.value.copy(
-            expandSelectNode = v
+    fun editProductWidgetExpandSelectNode(v: Boolean): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
+            expandSelectProtocol = v
         )
     }
 
-    fun productClearSelectNode(): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetClearSelectProtocol(): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             protocolIdList = emptyList()
         )
     }
 
-    fun productMainImage(v: String): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetMainImage(v: String): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             mainImage = v
         )
     }
 
-    fun productBasePrice(v: String): Unit {
+    fun editProductWidgetMonthlyPrice(v: String): Unit {
         val err = when (val res = ValidationUtils.validateDecimalPlaces2(v)) {
             is ValidationResult.Failure -> res.error
 
             is ValidationResult.Success -> ""
         }
 
-        _productWidget.value = _productWidget.value.copy(
+        _editProductWidget.value = _editProductWidget.value.copy(
             monthlyPrice = v,
             monthlyPriceError = err
         )
     }
 
-    fun productQuarterlyPrice(v: String): Unit {
+    fun editProductWidgetQuarterlyPrice(v: String): Unit {
         val err = when (val res = ValidationUtils.validateDecimalPlaces2(v)) {
             is ValidationResult.Failure -> res.error
 
             is ValidationResult.Success -> ""
         }
 
-        _productWidget.value = _productWidget.value.copy(
+        _editProductWidget.value = _editProductWidget.value.copy(
             quarterlyPrice = v,
             quarterlyPriceError = err
         )
     }
 
-    fun productSemiAnnualPrice(v: String): Unit {
+    fun editProductWidgetSemiAnnualPrice(v: String): Unit {
         val err = when (val res = ValidationUtils.validateDecimalPlaces2(v)) {
             is ValidationResult.Failure -> res.error
 
             is ValidationResult.Success -> ""
         }
 
-        _productWidget.value = _productWidget.value.copy(
+        _editProductWidget.value = _editProductWidget.value.copy(
             semiAnnualPrice = v,
             semiAnnualPriceError = err
         )
     }
 
-    fun productAnnualPrice(v: String): Unit {
+    fun editProductWidgetAnnualPrice(v: String): Unit {
         val err = when (val res = ValidationUtils.validateDecimalPlaces2(v)) {
             is ValidationResult.Failure -> res.error
 
             is ValidationResult.Success -> ""
         }
 
-        _productWidget.value = _productWidget.value.copy(
+        _editProductWidget.value = _editProductWidget.value.copy(
             annualPrice = v,
             annualPriceError = err
         )
     }
 
-    fun productDetail(v: String): Unit {
-        _productWidget.value = _productWidget.value.copy(
+    fun editProductWidgetDetail(v: String): Unit {
+        _editProductWidget.value = _editProductWidget.value.copy(
             detail = v
         )
     }
 
-    fun productCheckedProtocolId(v: UInt, checked: Boolean) {
-        val l = _productWidget.value.protocolIdList.toMutableList().apply {
+    fun editProductWidgetCheckedProtocol(v: UInt, checked: Boolean) {
+        val l = _editProductWidget.value.protocolIdList.toMutableList().apply {
             if (checked) add(v) else remove(v)
         }
-        _productWidget.value = _productWidget.value.copy(protocolIdList = l)
+        _editProductWidget.value = _editProductWidget.value.copy(protocolIdList = l)
     }
 
-    fun productClearCheckedProtocolId() {
-        _productWidget.value = _productWidget.value.copy(protocolIdList = emptyList())
+    fun editProductWidgetClearCheckedProtocol() {
+        _editProductWidget.value = _editProductWidget.value.copy(protocolIdList = emptyList())
     }
 
-    fun productRichTextEditor(v: Boolean) {
-        _productWidget.value = _productWidget.value.copy(expandRichTextEditorDrawer = v)
+    fun editProductWidgetExpandRichTextEditor(v: Boolean) {
+        _editProductWidget.value = _editProductWidget.value.copy(expandRichTextEditorDrawer = v)
     }
 
 
@@ -522,7 +475,7 @@ data class EditProductWidget(
     val annualPriceError: String = "",
 
     val expandProductCategory: Boolean = false,
-    val expandSelectNode: Boolean = false,
+    val expandSelectProtocol: Boolean = false,
     val expandRichTextEditorDrawer: Boolean = false,
 
     val oldUpdateProductReq: UpdateProductReq = UpdateProductReq(),
